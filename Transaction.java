@@ -2,34 +2,52 @@ import java.time.LocalDate;
 
 
 public class Transaction {
-        private Category category;
-        private double amount;
-        private LocalDate date;
-        private boolean isIncome;
-        
-        public Transaction(Category category, double amount, LocalDate date, boolean isIncome) {
-            this.category = category;
-            this.amount = amount;
-            this.date = date;
-            this.isIncome = isIncome;
-        }
+    private Category category;
+    private double amount;
+    private LocalDate date;
+    private boolean isIncome;
+    private String description;
 
-        //return attributes for external uses
-        public Category getCategory() {
-            return category;
-        }
+    public Transaction(Category category, double amount, LocalDate date, boolean isIncome, String description) {
+        this.category = category;
+        this.amount = amount;
+        this.date = date;
+        this.isIncome = isIncome;
 
-        public double getAmount() {
-            return amount;
+        if (category == Category.OTHER) {
+            this.description = description; // allow custom description
+        } else {
+            this.description = category.toString(); // auto-generate based on category
         }
+    }
 
-        public LocalDate getDate() {
-            return date;
-        }
+    public Transaction(String description, double amount, LocalDate date) {
+        this.category = Category.OTHER;
+        this.amount = amount;
+        this.date = date;
+        this.isIncome = false;
+        this.description = description;
+    }
 
-        public boolean isIncome() {
-            return isIncome;
-        }
+    public Category getCategory() {
+        return category;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public boolean isIncome() {
+        return isIncome;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
         //Make println(Transaction) work
         @Override
@@ -39,6 +57,6 @@ public class Transaction {
         	  type = "Income";
         	else 
         	  type = "Expense";
-            return type + ": " + category + " - $" + amount + " on " + date;
+            return type + ": " + description + " | $" + amount + " | " + date;
         }
     }

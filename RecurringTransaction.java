@@ -1,5 +1,4 @@
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,26 +30,43 @@ public class RecurringTransaction {
 
     // Generate initial transaction
     private void generateInitialTransaction() {
-        transactionHistory.add(new Transaction(description, amount, startDate));
+		//(Updated Jul 10)transactionHistory.add(new Transaction(description, amount, startDate));
+		LocalDate date = startDate;
+        for (int i = 0; i < maxOccurrences; i++) {
+            transactionHistory.add(new Transaction(Category.OTHER, amount, date, false, description));
+            date = getNextDate(date);
+		}
+        //====================================
     }
 
     // Generate transactions up to a specific date
     public void generateTransactionsUntil(LocalDate endDate) {
-        LocalDate currentDate = startDate;
-        int occurrences = transactionHistory.size();
-
+        /*(Updated Jul 10) LocalDate currentDate = startDate;
+          int occurrences = transactionHistory.size();
+        
         while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
             if (maxOccurrences != -1 && occurrences >= maxOccurrences) {
                 break;
             }
-
-            currentDate = getNextDate(currentDate);
-            if (currentDate.isAfter(endDate)) {
-                break;
+         */
+        LocalDate currentDate;
+        if (transactionHistory.isEmpty()) {
+            currentDate = startDate;
+        } 
+        else {
+        	LocalDate lastDate = transactionHistory.get(transactionHistory.size() - 1).getDate();
+            currentDate = getNextDate(lastDate);
+        }
+        
+        while (!currentDate.isAfter(endDate)) {
+        	if (maxOccurrences != -1 && transactionHistory.size() >= maxOccurrences) {
+                break; 
             }
 
-            transactionHistory.add(new Transaction(description, amount, currentDate));
-            occurrences++;
+        	transactionHistory.add(new Transaction(description, amount, currentDate));
+        	currentDate = getNextDate(currentDate);
+        	// occurrences++; 
+       //=============================================================
         }
     }
 
@@ -70,7 +86,9 @@ public class RecurringTransaction {
 
     // Get transaction history
     public List<Transaction> getTransactionHistory() {
-        return new ArrayList<>(transactionHistory);
+		//(Updated Jul 10)return new ArrayList<>(transactionHistory);
+		return transactionHistory;
+		//==============================
     }
 
 

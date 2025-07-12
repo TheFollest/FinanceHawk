@@ -1,6 +1,15 @@
-
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Search {
+	private List<Transaction> transactions;
+	
+	//Constructor
+    public Search(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
     // Search transactions by description (case-insensitive)
     public List<Transaction> searchByDescription(String keyword) {
@@ -25,10 +34,12 @@ public class Search {
     }
 
     // Filter transactions by category
-    public List<Transaction> filterByCategory(String category) {
+    public List<Transaction> filterByCategory(Category category) {
         return transactions.stream()
-                .filter(t -> t.getCategory().equalsIgnoreCase(category))
-                .collect(Collectors.toList());
+                //(updated Jul 10).filter(t -> t.getCategory().equalsIgnoreCase(category))
+                .filter(t -> t.getCategory() == category)
+                //===========================
+				.collect(Collectors.toList());
     }
 
     // Get all transactions

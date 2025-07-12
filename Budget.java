@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Budget {
     private String name;
@@ -12,10 +13,16 @@ public class Budget {
         this.category = category;
         this.transactions = new ArrayList<>();
     }
+    
+    public String getName() {
+        return this.name;
+    }
 
-    public void addTransaction(Transaction t) {
-        if (t.getCategory() == category) {
-            transactions.add(t);
+    public void addTransaction(Transaction t) {    
+	//(updated Jul 10)  if (t.getCategory() == category) {
+		if (t.getCategory() == this.category && !t.isIncome()) {
+	//=======================
+			transactions.add(t);
         }
     }
 
@@ -26,13 +33,22 @@ public class Budget {
     public boolean isOverBudget() {
         return getTotalSpent() > limit;
     }
-
+    
+    public boolean isCloseLimit() {
+        return getTotalSpent() >= (this.limit * 0.8);
+    }
+    
     public double getRemaining() {
         return limit - getTotalSpent();
     }
-
+	
+	@Override
     public String toString() {
-        return name + " [" + category + "]: $" + getTotalSpent() + " / $" + limit +
+        /*(updated Jul 10)return name + " [" + category + "]: $" + getTotalSpent() + " / $" + limit +
                (isOverBudget() ? " (Over Budget!)" : "");
+		*/
+		return name + " [" + category + "]: $" + String.format("%.2f", getTotalSpent()) + " / $" + limit +
+               (isOverBudget() ? " (Over Budget!)" : (isCloseLimit() ? " (80% of Limit!)" :""));
+		//==================================
     }
 }

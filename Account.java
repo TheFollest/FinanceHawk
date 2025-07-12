@@ -3,13 +3,36 @@ import java.util.List;
 
 public class Account {
     private List<Transaction> transactions;
+    private List<Budget> budgets;
     
     public Account() {
         transactions = new ArrayList<>();
+        budgets = new ArrayList<>();
     }
 
+    public void addBudget(Budget budget) {
+        this.budgets.add(budget);
+    }
+    
     public void addTransaction(Transaction t) {
         transactions.add(t);
+        for (Budget budget : this.budgets) {
+        	// Check status BEFORE adding the transaction
+        	boolean wasClose = budget.isCloseLimit();
+        	boolean wasOver = budget.isOverBudget();
+        	
+            budget.addTransaction(t); 
+            
+            // Check status AFTER adding the transaction
+            boolean isClose = budget.isCloseLimit();
+        	boolean isOver = budget.isOverBudget();
+        	
+        	//Notify
+        	if (isOver && !wasOver)
+        		System.out.println("You have exceeded your " + budget.getName());
+        	else if (isClose && !wasClose)
+        		System.out.println("You have reached 80% of your " + budget.getName());    
+        }
     }
 
     public List<Transaction> getTransactions() {
