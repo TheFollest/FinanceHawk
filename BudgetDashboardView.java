@@ -26,18 +26,32 @@ public class BudgetDashboardView {
         totalLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
         totalLabel.setTextFill(Color.LIGHTGREEN);
 
-        VBox budgetBars = buildBudgetBars(account);
+        VBox[] budgetBoxContainer = new VBox[1];
+        budgetBoxContainer[0] = buildBudgetBars(account, () -> {
+            VBox updated = buildBudgetBars(account, onRefresh);
+            int index = layout.getChildren().indexOf(budgetBoxContainer[0]);
+            layout.getChildren().set(index, updated);
+            budgetBoxContainer[0] = updated;
+        });
 
         Button backButton = new Button("Back to Dashboard");
         backButton.setOnAction(e -> onNavigate.accept("main"));
 
-        VBox inputForm = buildInputForm(account, onRefresh);
+        VBox inputForm = buildInputForm(account, () -> {
+            // Update total label
+            totalLabel.setText("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
+            // Trigger the budgetBoxContainer refresh
+            VBox updated = buildBudgetBars(account, onRefresh);
+            int index = layout.getChildren().indexOf(budgetBoxContainer[0]);
+            layout.getChildren().set(index, updated);
+            budgetBoxContainer[0] = updated;
+        });
 
-        layout.getChildren().addAll(title, totalLabel, budgetBars, inputForm, backButton);
+        layout.getChildren().addAll(title, totalLabel, budgetBoxContainer[0], inputForm, backButton);
         return layout;
     }
 
-    private static VBox buildBudgetBars(Account account) {
+    private static VBox buildBudgetBars(Account account, Runnable onRefresh) {
         VBox budgetBox = new VBox(10);
         budgetBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -61,7 +75,17 @@ public class BudgetDashboardView {
                 Label label = new Label(budget.getName() + ": $" + String.format("%.2f", spent) + " / $" + limit);
                 label.setTextFill(Color.WHITE);
 
-                VBox entry = new VBox(label, bar);
+                Button deleteBtn = new Button("X");
+                deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                deleteBtn.setOnAction(e -> {
+                    budgets.remove(budget);
+                    onRefresh.run();
+                });
+
+                HBox row = new HBox(10, label, deleteBtn);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                VBox entry = new VBox(row, bar);
                 budgetBox.getChildren().add(entry);
             }
         } catch (Exception e) {
@@ -135,4 +159,4 @@ public class BudgetDashboardView {
         }
         return total;
     }
-} 
+}
