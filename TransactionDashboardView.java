@@ -50,6 +50,17 @@ public class TransactionDashboardView {
         Label noteLabel = new Label("Note:");
         noteLabel.setTextFill(Color.WHITE);
         TextField noteField = new TextField();
+        HBox noteRow = new HBox(10, noteLabel, noteField);
+        noteRow.setVisible(false);
+        noteRow.setManaged(false);
+
+        // Show Note field only if "OTHER" category is selected
+        categoryCombo.setOnAction(e -> {
+            Category selected = categoryCombo.getValue();
+            boolean showNote = selected == Category.OTHER;
+            noteRow.setVisible(showNote);
+            noteRow.setManaged(showNote);
+        });
 
         Button addBtn = new Button("Add Transaction");
         Label feedback = new Label();
@@ -69,6 +80,12 @@ public class TransactionDashboardView {
                     return;
                 }
 
+                if (category == Category.OTHER && note.isEmpty()) {
+                    feedback.setTextFill(Color.ORANGE);
+                    feedback.setText("Please provide a note for 'Other' category.");
+                    return;
+                }
+
                 Transaction txn = new Transaction(category, amount, date, isIncome, note);
                 account.addTransaction(txn);
                 feedback.setTextFill(Color.LIGHTGREEN);
@@ -80,6 +97,8 @@ public class TransactionDashboardView {
                 incomeCheck.setSelected(false);
                 categoryCombo.setValue(null);
                 datePicker.setValue(LocalDate.now());
+                noteRow.setVisible(false);
+                noteRow.setManaged(false);
                 onNavigate.accept("transactions");
 
             } catch (Exception ex) {
@@ -94,7 +113,7 @@ public class TransactionDashboardView {
                 new HBox(10, dateLabel, datePicker),
                 incomeCheck,
                 recurringCheck,
-                new HBox(10, noteLabel, noteField),
+                noteRow,
                 addBtn,
                 feedback
         );
