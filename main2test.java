@@ -59,6 +59,11 @@ public class main2test extends Application {
         updateScene(root, "Finance Hawk - Transactions");
     }
 
+    private void showSearchDashboard() {
+        VBox root = SearchDashboardView.create(account, this::navigate, this::showDashboard);
+        updateScene(root, "Finance Hawk - Search");
+    }
+
     private void updateScene(VBox root, String title) {
         Scene scene = new Scene(root, prevWidth, prevHeight);
         primaryStage.setScene(scene);
@@ -79,6 +84,7 @@ public class main2test extends Application {
         switch (page) {
             case "budget" -> showBudgetDashboard();
             case "transactions" -> showTransactionDashboard();
+            case "search" -> showSearchDashboard();
             default -> showDashboard();
         }
     }

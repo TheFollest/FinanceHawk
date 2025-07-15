@@ -10,6 +10,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -44,7 +45,10 @@ public class DashboardView {
         Button transactionBtn = new Button("Transactions");
         transactionBtn.setOnAction(e -> onNavigate.accept("transactions"));
 
-        buttons.getChildren().addAll(budgetBtn, transactionBtn);
+        Button searchBtn = new Button("Search");
+        searchBtn.setOnAction(e -> onNavigate.accept("search"));
+
+        buttons.getChildren().addAll(budgetBtn, transactionBtn, searchBtn);
         return buttons;
     }
 
@@ -135,8 +139,8 @@ public class DashboardView {
         container.setAlignment(Pos.CENTER);
         container.setPadding(new Insets(10));
 
-        double income = account.getTotalIncome();  // FIXED
-        double expense = account.getTotalExpenses();  // FIXED
+        double income = account.getTotalIncome();
+        double expense = account.getTotalExpenses();
 
         double max = Math.max(income, expense);
         double incomePercent = max == 0 ? 0 : income / max;
