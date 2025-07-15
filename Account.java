@@ -4,7 +4,8 @@ import java.util.List;
 public class Account {
     private List<Transaction> transactions;
     private List<Budget> budgets;
-    
+
+
     public Account() {
         transactions = new ArrayList<>();
         budgets = new ArrayList<>();
@@ -57,7 +58,7 @@ public class Account {
     public double FilterCategory(Category category, boolean isIncome) {
         double total = 0;
         for (Transaction t : transactions) {
-            if (t.getCategory() == category && t.isIncome() == isIncome) 
+            if ((category == null || t.getCategory() == category) && t.isIncome() == isIncome) // added null for UI chart
                 total = total + t.getAmount();      
         }
         return total;
@@ -78,5 +79,13 @@ public class Account {
         }
         sb.append("Current Balance: $").append(String.format("%.2f", getBalance()));
         return sb.toString();
+    }
+    // Adding class for UI expense vs income chart
+    public double getTotalIncome() {
+        return FilterCategory(null, true);
+    }
+
+    public double getTotalExpenses() {
+        return FilterCategory(null, false);
     }
 }

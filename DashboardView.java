@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
@@ -9,7 +10,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class DashboardView {
@@ -25,7 +26,8 @@ public class DashboardView {
             buildHeader(account),
             buildSpendingChart(account),
             buildBudgetBars(account),
-            buildRecurringList(),
+            buildIncomeExpenseSummary(account),
+            buildRecentTransactions(account),
             buildAlerts(account)
         );
 
@@ -65,6 +67,19 @@ public class DashboardView {
         PieChart chart = new PieChart();
         chart.setTitle("Expenses by Category");
 
+        Map<String, String> categoryColors = new HashMap<>();
+        categoryColors.put("SALARY", "#ffee58");
+        categoryColors.put("FREELANCE", "#c0ca33");
+        categoryColors.put("RENT", "#d32f2f");
+        categoryColors.put("GROCERIES", "#ff704d");
+        categoryColors.put("UTILITIES", "#8e24aa");
+        categoryColors.put("ENTERTAINMENT", "#ffa726");
+        categoryColors.put("DINING", "#5c6bc0");
+        categoryColors.put("SUBSCRIPTION", "#26c6da");
+        categoryColors.put("TRANSPORT", "#7cb342");
+        categoryColors.put("MEDICAL", "#66bb6a");
+        categoryColors.put("OTHER", "#42a5f5");
+
         for (Category cat : Category.values()) {
             double amount = account.FilterCategory(cat, false);
             if (amount > 0) {
@@ -74,30 +89,23 @@ public class DashboardView {
         }
 
         chart.setLabelsVisible(true);
-        chart.setLegendVisible(false);  // We'll draw our own
+        chart.setLegendVisible(false);
+        chart.applyCss();
+        chart.layout();
 
-        // Apply custom colors per category
         for (PieChart.Data data : chart.getData()) {
-            String color = switch (data.getName().toUpperCase()) {
-                case "GROCERIES" -> "#ff704d";
-                case "ENTERTAINMENT" -> "#ffa726";
-                case "MEDICAL" -> "#66bb6a";
-                case "OTHER" -> "#42a5f5";
-                case "SALARY" -> "#ffee58";
-                default -> "#bdbdbd";
-            };
+            String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
             data.getNode().setStyle("-fx-pie-color: " + color + ";");
         }
 
-        chart.applyCss();
-        chart.layout();
-        chart.lookupAll(".chart-pie-label").forEach(node -> {
-            if (node instanceof Label) {
-                ((Label) node).setStyle("-fx-text-fill: white;");
-            }
+        Platform.runLater(() -> {
+            chart.lookupAll(".chart-pie-label").forEach(node -> {
+                if (node instanceof Labeled labeled) {
+                    labeled.setTextFill(Color.WHITE);
+                }
+            });
         });
 
-        // Custom Legend
         HBox legend = new HBox(15);
         legend.setPadding(new Insets(10));
         legend.setAlignment(Pos.CENTER);
@@ -120,6 +128,40 @@ public class DashboardView {
 
         chartContainer.getChildren().addAll(chart, legend);
         return chartContainer;
+    }
+
+    private static VBox buildIncomeExpenseSummary(Account account) {
+        VBox container = new VBox(10);
+        container.setAlignment(Pos.CENTER);
+        container.setPadding(new Insets(10));
+
+        double income = account.getTotalIncome();  // FIXED
+        double expense = account.getTotalExpenses();  // FIXED
+
+        double max = Math.max(income, expense);
+        double incomePercent = max == 0 ? 0 : income / max;
+        double expensePercent = max == 0 ? 0 : expense / max;
+
+        Label title = new Label("Income vs Expense");
+        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        title.setTextFill(Color.WHITE);
+
+        ProgressBar incomeBar = new ProgressBar(incomePercent);
+        incomeBar.setStyle("-fx-accent: #4CAF50;");
+        incomeBar.setPrefWidth(400);
+
+        Label incomeLabel = new Label("Income: $" + String.format("%.2f", income));
+        incomeLabel.setTextFill(Color.LIGHTGREEN);
+
+        ProgressBar expenseBar = new ProgressBar(expensePercent);
+        expenseBar.setStyle("-fx-accent: #E53935;");
+        expenseBar.setPrefWidth(400);
+
+        Label expenseLabel = new Label("Expense: $" + String.format("%.2f", expense));
+        expenseLabel.setTextFill(Color.SALMON);
+
+        container.getChildren().addAll(title, incomeLabel, incomeBar, expenseLabel, expenseBar);
+        return container;
     }
 
     private static ScrollPane buildBudgetBars(Account account) {
@@ -161,19 +203,35 @@ public class DashboardView {
         return scrollPane;
     }
 
-    private static VBox buildRecurringList() {
-        VBox recurringBox = new VBox(10);
-        recurringBox.setAlignment(Pos.CENTER_LEFT);
+    private static VBox buildRecentTransactions(Account account) {
+        VBox recentBox = new VBox(10);
+        recentBox.setAlignment(Pos.CENTER_LEFT);
 
-        Label header = new Label("Recurring Transactions");
+        Label header = new Label("Recent Transactions");
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
         header.setTextFill(Color.WHITE);
 
-        Label placeholder = new Label("(Recurring transactions will be shown here.)");
-        placeholder.setTextFill(Color.WHITE);
+        VBox items = new VBox(5);
 
-        recurringBox.getChildren().addAll(header, placeholder);
-        return recurringBox;
+        try {
+            Field field = Account.class.getDeclaredField("transactions");
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            List<Transaction> transactions = (List<Transaction>) field.get(account);
+
+            int count = 0;
+            for (int i = transactions.size() - 1; i >= 0 && count < 5; i--, count++) {
+                Transaction t = transactions.get(i);
+                Label l = new Label(t.toString());
+                l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
+                items.getChildren().add(l);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        recentBox.getChildren().addAll(header, items);
+        return recentBox;
     }
 
     private static VBox buildAlerts(Account account) {
