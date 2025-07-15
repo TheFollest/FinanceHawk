@@ -19,15 +19,11 @@ public class TransactionDashboardView {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
+        layout.getChildren().add(buildButtonBar(onNavigate));
+
         Label title = new Label("Transaction Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 28));
         title.setTextFill(Color.WHITE);
-
-        HBox backRow = new HBox();
-        backRow.setAlignment(Pos.TOP_LEFT);
-        Button back = new Button("Back to Dashboard");
-        back.setOnAction(e -> onBack.run());
-        backRow.getChildren().add(back);
 
         VBox form = new VBox(10);
         form.setAlignment(Pos.CENTER_LEFT);
@@ -77,6 +73,7 @@ public class TransactionDashboardView {
                 account.addTransaction(txn);
                 feedback.setTextFill(Color.LIGHTGREEN);
                 feedback.setText("Transaction added!");
+
                 amountField.clear();
                 noteField.clear();
                 recurringCheck.setSelected(false);
@@ -143,7 +140,28 @@ public class TransactionDashboardView {
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
 
-        layout.getChildren().addAll(backRow, title, form, recentLabel, scroll);
+        layout.getChildren().addAll(title, form, recentLabel, scroll);
         return layout;
+    }
+
+    private static HBox buildButtonBar(Consumer<String> onNavigate) {
+        HBox buttons = new HBox(10);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+        buttons.setPadding(new Insets(0, 0, 10, 0));
+
+        Button dashboardBtn = new Button("Dashboard");
+        dashboardBtn.setOnAction(e -> onNavigate.accept("dashboard"));
+
+        Button budgetBtn = new Button("Budget");
+        budgetBtn.setOnAction(e -> onNavigate.accept("budget"));
+
+        Button transactionBtn = new Button("Transactions");
+        transactionBtn.setDisable(true);
+
+        Button searchBtn = new Button("Search");
+        searchBtn.setOnAction(e -> onNavigate.accept("search"));
+
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn);
+        return buttons;
     }
 }

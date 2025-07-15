@@ -10,7 +10,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.lang.reflect.Field;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -64,75 +63,84 @@ public class DashboardView {
         return headerBox;
     }
 
-    private static VBox buildSpendingChart(Account account) {
-        VBox chartContainer = new VBox(10);
-        chartContainer.setAlignment(Pos.CENTER);
+  private static VBox buildSpendingChart(Account account) {
+    VBox chartContainer = new VBox(10);
+    chartContainer.setAlignment(Pos.CENTER);
+    chartContainer.setPadding(new Insets(20));
+    chartContainer.setStyle("""
+        -fx-background-color: rgba(255, 255, 255, 0.08);
+        -fx-background-radius: 15;
+        -fx-border-radius: 15;
+        -fx-border-color: white;
+        -fx-border-width: 1;
+    """);
 
-        PieChart chart = new PieChart();
-        chart.setTitle("Expenses by Category");
+    PieChart chart = new PieChart();
+    chart.setTitle("Expenses by Category");
 
-        Map<String, String> categoryColors = new HashMap<>();
-        categoryColors.put("SALARY", "#ffee58");
-        categoryColors.put("FREELANCE", "#c0ca33");
-        categoryColors.put("RENT", "#d32f2f");
-        categoryColors.put("GROCERIES", "#ff704d");
-        categoryColors.put("UTILITIES", "#8e24aa");
-        categoryColors.put("ENTERTAINMENT", "#ffa726");
-        categoryColors.put("DINING", "#5c6bc0");
-        categoryColors.put("SUBSCRIPTION", "#26c6da");
-        categoryColors.put("TRANSPORT", "#7cb342");
-        categoryColors.put("MEDICAL", "#66bb6a");
-        categoryColors.put("OTHER", "#42a5f5");
+    Map<String, String> categoryColors = new HashMap<>();
+    categoryColors.put("SALARY", "#ffee58");
+    categoryColors.put("FREELANCE", "#c0ca33");
+    categoryColors.put("RENT", "#d32f2f");
+    categoryColors.put("GROCERIES", "#ff704d");
+    categoryColors.put("UTILITIES", "#8e24aa");
+    categoryColors.put("ENTERTAINMENT", "#ffa726");
+    categoryColors.put("DINING", "#5c6bc0");
+    categoryColors.put("SUBSCRIPTION", "#26c6da");
+    categoryColors.put("TRANSPORT", "#7cb342");
+    categoryColors.put("MEDICAL", "#66bb6a");
+    categoryColors.put("OTHER", "#42a5f5");
 
-        for (Category cat : Category.values()) {
-            double amount = account.FilterCategory(cat, false);
-            if (amount > 0) {
-                PieChart.Data data = new PieChart.Data(cat.toString(), amount);
-                chart.getData().add(data);
-            }
+    for (Category cat : Category.values()) {
+        double amount = account.FilterCategory(cat, false);
+        if (amount > 0) {
+            PieChart.Data data = new PieChart.Data(cat.toString(), amount);
+            chart.getData().add(data);
         }
-
-        chart.setLabelsVisible(true);
-        chart.setLegendVisible(false);
-        chart.applyCss();
-        chart.layout();
-
-        for (PieChart.Data data : chart.getData()) {
-            String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
-            data.getNode().setStyle("-fx-pie-color: " + color + ";");
-        }
-
-        Platform.runLater(() -> {
-            chart.lookupAll(".chart-pie-label").forEach(node -> {
-                if (node instanceof Labeled labeled) {
-                    labeled.setTextFill(Color.WHITE);
-                }
-            });
-        });
-
-        HBox legend = new HBox(15);
-        legend.setPadding(new Insets(10));
-        legend.setAlignment(Pos.CENTER);
-        legend.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
-
-        for (PieChart.Data data : chart.getData()) {
-            Label label = new Label(data.getName());
-            label.setStyle("-fx-text-fill: black; -fx-font-weight: bold;");
-            Region colorBox = new Region();
-            colorBox.setPrefSize(10, 10);
-
-            String nodeStyle = data.getNode().getStyle();
-            String fillColor = nodeStyle.substring(nodeStyle.indexOf("#")).replace(";", "");
-            colorBox.setStyle("-fx-background-color: " + fillColor + ";");
-
-            HBox entry = new HBox(5, colorBox, label);
-            entry.setAlignment(Pos.CENTER);
-            legend.getChildren().add(entry);
-        }
-
-        chartContainer.getChildren().addAll(chart, legend);
-        return chartContainer;
     }
+
+    chart.setLabelsVisible(true);
+    chart.setLegendVisible(false);
+    chart.applyCss();
+    chart.layout();
+
+    for (PieChart.Data data : chart.getData()) {
+        String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
+        data.getNode().setStyle("-fx-pie-color: " + color + ";");
+    }
+
+    Platform.runLater(() -> {
+        chart.lookupAll(".chart-pie-label").forEach(node -> {
+            if (node instanceof Labeled labeled) {
+                labeled.setTextFill(Color.WHITE);
+            }
+        });
+    });
+
+    HBox legend = new HBox(15);
+    legend.setPadding(new Insets(10));
+    legend.setAlignment(Pos.CENTER);
+    legend.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10;");
+
+    for (PieChart.Data data : chart.getData()) {
+        Label label = new Label(data.getName());
+        label.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+        Region colorBox = new Region();
+        colorBox.setPrefSize(10, 10);
+
+        String nodeStyle = data.getNode().getStyle();
+        String fillColor = nodeStyle.substring(nodeStyle.indexOf("#")).replace(";", "");
+        colorBox.setStyle("-fx-background-color: " + fillColor + ";");
+
+        HBox entry = new HBox(5, colorBox, label);
+        entry.setAlignment(Pos.CENTER);
+        legend.getChildren().add(entry);
+    }
+
+    chartContainer.getChildren().addAll(chart, legend);
+    return chartContainer;
+}
+
 
     private static VBox buildIncomeExpenseSummary(Account account) {
         VBox container = new VBox(10);

@@ -12,11 +12,13 @@ import java.util.function.Consumer;
 
 public class BudgetDashboardView {
 
-    public static VBox create(Account account, Consumer<String> onNavigate, Runnable onRefresh) {
+    public static VBox create(Account account, Consumer<String> onNavigate, Runnable onBack) {
         VBox layout = new VBox(20);
         layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
+
+        layout.getChildren().add(buildButtonBar(onNavigate));
 
         Label title = new Label("Budget Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 30));
@@ -26,34 +28,39 @@ public class BudgetDashboardView {
         totalLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
         totalLabel.setTextFill(Color.LIGHTGREEN);
 
-        VBox[] budgetBoxContainer = new VBox[1];
-        budgetBoxContainer[0] = buildBudgetBars(account, () -> {
-            VBox updated = buildBudgetBars(account, onRefresh);
-            int index = layout.getChildren().indexOf(budgetBoxContainer[0]);
-            layout.getChildren().set(index, updated);
-            budgetBoxContainer[0] = updated;
-        });
+        VBox budgetBoxContainer = new VBox();
+        refreshBudgetBars(account, budgetBoxContainer, totalLabel);
 
-        Button backButton = new Button("Back to Dashboard");
-        backButton.setOnAction(e -> onNavigate.accept("main"));
+        VBox inputForm = buildInputForm(account, () -> refreshBudgetBars(account, budgetBoxContainer, totalLabel));
 
-        VBox inputForm = buildInputForm(account, () -> {
-            // Update total label
-            totalLabel.setText("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
-            // Trigger the budgetBoxContainer refresh
-            VBox updated = buildBudgetBars(account, onRefresh);
-            int index = layout.getChildren().indexOf(budgetBoxContainer[0]);
-            layout.getChildren().set(index, updated);
-            budgetBoxContainer[0] = updated;
-        });
-
-        layout.getChildren().addAll(title, totalLabel, budgetBoxContainer[0], inputForm, backButton);
+        layout.getChildren().addAll(title, totalLabel, budgetBoxContainer, inputForm);
         return layout;
     }
 
-    private static VBox buildBudgetBars(Account account, Runnable onRefresh) {
-        VBox budgetBox = new VBox(10);
-        budgetBox.setAlignment(Pos.CENTER_LEFT);
+    private static HBox buildButtonBar(Consumer<String> onNavigate) {
+        HBox buttons = new HBox(10);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+        buttons.setPadding(new Insets(0, 0, 10, 0));
+
+        Button dashboardBtn = new Button("Dashboard");
+        dashboardBtn.setOnAction(e -> onNavigate.accept("dashboard"));
+
+        Button budgetBtn = new Button("Budget");
+        budgetBtn.setDisable(true);
+
+        Button transactionBtn = new Button("Transactions");
+        transactionBtn.setOnAction(e -> onNavigate.accept("transactions"));
+
+        Button searchBtn = new Button("Search");
+        searchBtn.setOnAction(e -> onNavigate.accept("search"));
+
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn);
+        return buttons;
+    }
+
+    private static void refreshBudgetBars(Account account, VBox container, Label totalLabel) {
+        container.getChildren().clear();
+        totalLabel.setText("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
 
         try {
             Field field = Account.class.getDeclaredField("budgets");
@@ -79,20 +86,18 @@ public class BudgetDashboardView {
                 deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                 deleteBtn.setOnAction(e -> {
                     budgets.remove(budget);
-                    onRefresh.run();
+                    refreshBudgetBars(account, container, totalLabel);
                 });
 
                 HBox row = new HBox(10, label, deleteBtn);
                 row.setAlignment(Pos.CENTER_LEFT);
 
                 VBox entry = new VBox(row, bar);
-                budgetBox.getChildren().add(entry);
+                container.getChildren().add(entry);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return budgetBox;
     }
 
     private static VBox buildInputForm(Account account, Runnable onRefresh) {
@@ -114,6 +119,7 @@ public class BudgetDashboardView {
         amountLabel.setTextFill(Color.WHITE);
 
         Label categoryLabel = new Label("Category:");
+        categoryLabel.setTextFill(Color.WHITE);
         ComboBox<Category> categoryBox = new ComboBox<>();
         categoryBox.getItems().setAll(Category.values());
 

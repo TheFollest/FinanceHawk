@@ -30,9 +30,6 @@ public class SearchDashboardView {
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
-        Button backBtn = new Button("← Back");
-        backBtn.setOnAction(e -> onBack.run());
-
         Button budgetBtn = new Button("Budget");
         budgetBtn.setOnAction(e -> onNavigate.accept("budget"));
 
@@ -45,7 +42,7 @@ public class SearchDashboardView {
         Button searchBtn = new Button("Search");
         searchBtn.setDisable(true);
 
-        buttons.getChildren().addAll(backBtn, dashboardBtn, budgetBtn, transactionBtn, searchBtn);
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn);
         return buttons;
     }
 
