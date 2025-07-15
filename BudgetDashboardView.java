@@ -7,6 +7,17 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate; // IMPORT ADDED
+import java.util.List;
+import java.util.function.Consumer;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -85,7 +96,7 @@ public class BudgetDashboardView {
                 Button deleteBtn = new Button("X");
                 deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                 deleteBtn.setOnAction(e -> {
-                    budgets.remove(budget);
+                	budgets.remove(budget);
                     refreshBudgetBars(account, container, totalLabel);
                 });
 
@@ -122,6 +133,15 @@ public class BudgetDashboardView {
         categoryLabel.setTextFill(Color.WHITE);
         ComboBox<Category> categoryBox = new ComboBox<>();
         categoryBox.getItems().setAll(Category.values());
+        
+        // --- NEW Date Fields ---
+        Label startLabel = new Label("Start Date:");
+        startLabel.setTextFill(Color.WHITE);
+        DatePicker startDatePicker = new DatePicker(LocalDate.now().withDayOfMonth(1));
+
+        Label endLabel = new Label("End Date:");
+        endLabel.setTextFill(Color.WHITE);
+        DatePicker endDatePicker = new DatePicker(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
 
         grid.add(nameLabel, 0, 0);
         grid.add(nameField, 1, 0);
@@ -129,18 +149,29 @@ public class BudgetDashboardView {
         grid.add(amountField, 1, 1);
         grid.add(categoryLabel, 0, 2);
         grid.add(categoryBox, 1, 2);
+        //New fields
+        grid.add(startLabel, 0, 3);    
+        grid.add(startDatePicker, 1, 3); 
+        grid.add(endLabel, 0, 4);      
+        grid.add(endDatePicker, 1, 4);   
 
         Button submit = new Button("Add Budget");
         submit.setOnAction(e -> {
             String name = nameField.getText();
             String amountText = amountField.getText();
             Category category = categoryBox.getValue();
+            LocalDate startDate = startDatePicker.getValue(); 
+            LocalDate endDate = endDatePicker.getValue();     
 
             if (!name.isEmpty() && amountText.matches("\\d+(\\.\\d+)?") && category != null) {
                 double limit = Double.parseDouble(amountText);
-                Budget newBudget = new Budget(name, limit, category);
+                Budget newBudget = new Budget(name, limit, category, startDate, endDate);
                 account.addBudget(newBudget);
                 onRefresh.run();
+                // Clear fields
+                nameField.clear();
+                amountField.clear();
+                categoryBox.setValue(null);
             }
         });
 

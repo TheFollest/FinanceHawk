@@ -66,8 +66,18 @@ public class Account {
     
     
     //For testing
-    public void clearTransactions() {
-        transactions.clear();
+    //public void clearTransactions() {
+    //    transactions.clear();
+    //}
+    
+    public void deleteTransaction(Transaction t) {
+        // Remove from the account's main list
+        this.transactions.remove(t);
+
+        // Also remove from any associated budgets
+        for (Budget budget : this.budgets) {
+            budget.removeTransaction(t);
+        }
     }
 
     //Make println(Account) work

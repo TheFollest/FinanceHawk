@@ -35,8 +35,8 @@ public class Main {
         Account account = new Account();
         
         //Create and add budget
-        Budget groceryBudget = new Budget("June Grocery Budget", 300.0, Category.GROCERIES);
-        Budget entertainmentBudget = new Budget("June Fun Budget", 150.0, Category.ENTERTAINMENT);        
+        Budget groceryBudget = new Budget("June Grocery Budget", 300.0, Category.GROCERIES, LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 31));
+        Budget entertainmentBudget = new Budget("June Fun Budget", 150.0, Category.ENTERTAINMENT, LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 31));        
         account.addBudget(groceryBudget);
         account.addBudget(entertainmentBudget);
 

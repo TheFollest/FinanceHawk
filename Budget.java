@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,11 +7,15 @@ public class Budget {
     private double limit;
     private Category category;
     private List<Transaction> transactions;
+    private LocalDate startDate; 
+    private LocalDate endDate;   
 
-    public Budget(String name, double limit, Category category) {
+    public Budget(String name, double limit, Category category, LocalDate startDate, LocalDate endDate) {
         this.name = name;
         this.limit = limit;
         this.category = category;
+        this.startDate = startDate;
+        this.endDate = endDate; 
         this.transactions = new ArrayList<>();
     }
     
@@ -18,10 +23,11 @@ public class Budget {
         return this.name;
     }
 
-    public void addTransaction(Transaction t) {    
-	//(updated Jul 10)  if (t.getCategory() == category) {
-		if (t.getCategory() == this.category && !t.isIncome()) {
-	//=======================
+    public void addTransaction(Transaction t) {   
+    	boolean withinTime = !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate);
+    	//(updated Jul 10)  if (t.getCategory() == category) {
+		if (t.getCategory() == this.category && !t.isIncome() && withinTime) {
+		//=======================
 			transactions.add(t);
         }
     }
@@ -42,6 +48,10 @@ public class Budget {
         return limit - getTotalSpent();
     }
 	
+    public void removeTransaction(Transaction t) {
+        this.transactions.remove(t);
+    }
+    
 	@Override
     public String toString() {
         /*(updated Jul 10)return name + " [" + category + "]: $" + getTotalSpent() + " / $" + limit +

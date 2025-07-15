@@ -25,11 +25,11 @@ public class RecurringTransaction {
         this.frequency = frequency;
         this.maxOccurrences = maxOccurrences;
         this.transactionHistory = new ArrayList<>();
-        generateInitialTransaction();
+        //generateInitialTransaction();
     }
 
     // Generate initial transaction
-    private void generateInitialTransaction() {
+    /*private void generateInitialTransaction() {
 		//(Updated Jul 10)transactionHistory.add(new Transaction(description, amount, startDate));
 		LocalDate date = startDate;
         for (int i = 0; i < maxOccurrences; i++) {
@@ -38,6 +38,7 @@ public class RecurringTransaction {
 		}
         //====================================
     }
+    */
 
     // Generate transactions up to a specific date
     public void generateTransactionsUntil(LocalDate endDate) {
@@ -89,6 +90,26 @@ public class RecurringTransaction {
 		//(Updated Jul 10)return new ArrayList<>(transactionHistory);
 		return transactionHistory;
 		//==============================
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public Frequency getFrequency() {
+        return frequency;
+    }
+
+    public int getMaxOccurrences() {
+        return maxOccurrences;
     }
 
 

@@ -59,4 +59,21 @@ public class Transaction {
         	  type = "Expense";
             return type + ": " + description + " | $" + amount + " | " + date;
         }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Transaction that = (Transaction) o;
+            return Double.compare(that.amount, amount) == 0 &&
+                   isIncome == that.isIncome &&
+                   category == that.category &&
+                   date.equals(that.date) &&
+                   description.equals(that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(category, amount, date, isIncome, description);
+        }
     }
