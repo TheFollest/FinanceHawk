@@ -57,7 +57,7 @@ public class SearchDashboardView {
 
     private static Label buildSearchInstructions() {
         Label instructions = new Label("Search your transactions by typing any of the following: category, description, or date (e.g. 'groceries', 'gift', '2025-06-09')");
-        instructions.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 16));
+        instructions.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 20));
         instructions.setTextFill(Color.LIGHTGRAY);
         instructions.setWrapText(true);
         instructions.setMaxWidth(800);
@@ -70,7 +70,8 @@ public class SearchDashboardView {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Enter search keyword...");
-        searchField.setPrefWidth(400);
+        searchField.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
+        searchField.setPrefWidth(1200);
 
         Button searchBtn = new Button("Search");
         HBox inputRow = new HBox(10, searchField, searchBtn);
@@ -78,7 +79,7 @@ public class SearchDashboardView {
 
         VBox resultsBox = new VBox(5);
         resultsBox.setAlignment(Pos.CENTER_LEFT);
-
+        searchBtn.setFont(Font.font("Segoe UI", FontWeight.BOLD, 24));
         searchBtn.setOnAction(e -> {
             String query = searchField.getText().trim();
             resultsBox.getChildren().clear();
@@ -92,14 +93,17 @@ public class SearchDashboardView {
 
             Search search = new Search(account.getTransactions());
             List<Transaction> results = search.searchByDescription(query);
+            
 
             if (results.isEmpty()) {
                 Label none = new Label("No transactions found matching: '" + query + "'");
+                none.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
                 none.setTextFill(Color.SALMON);
                 resultsBox.getChildren().add(none);
             } else {
                 for (Transaction t : results) {
                     Label result = new Label(t.toString());
+                    result.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
                     result.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
                     resultsBox.getChildren().add(result);
                 }
