@@ -30,26 +30,32 @@ public class TransactionDashboardView {
 
         Label amountLabel = new Label("Amount:");
         amountLabel.setTextFill(Color.WHITE);
+        amountLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
         TextField amountField = new TextField();
 
         Label categoryLabel = new Label("Category:");
         categoryLabel.setTextFill(Color.WHITE);
+        categoryLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
         ComboBox<Category> categoryCombo = new ComboBox<>();
         categoryCombo.getItems().addAll(Category.values());
 
         Label dateLabel = new Label("Date:");
         dateLabel.setTextFill(Color.WHITE);
+        dateLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
         DatePicker datePicker = new DatePicker(LocalDate.now());
 
         CheckBox incomeCheck = new CheckBox("Is Income?");
         incomeCheck.setTextFill(Color.WHITE);
+        incomeCheck.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
 
         Label noteLabel = new Label("Note:");
         noteLabel.setTextFill(Color.WHITE);
+        noteLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
         TextField noteField = new TextField();
         HBox noteRow = new HBox(10, noteLabel, noteField);
         noteRow.setVisible(false);
         noteRow.setManaged(false);
+        
 
         // Show Note field only if "OTHER" category is selected
         categoryCombo.setOnAction(e -> {
@@ -62,6 +68,7 @@ public class TransactionDashboardView {
         Button addBtn = new Button("Add Transaction");
         Label feedback = new Label();
         feedback.setTextFill(Color.LIGHTGREEN);
+        feedback.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
 
         addBtn.setOnAction(e -> {
             try {
@@ -130,7 +137,7 @@ public class TransactionDashboardView {
             for (Transaction txn : txns) {
                 Label entry = new Label(txn.toString());
                 entry.setTextFill(txn.isIncome() ? Color.DARKGREEN : Color.DARKRED);
-
+                entry.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
                 Button deleteBtn = new Button("X");
                 deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                 deleteBtn.setOnAction(e -> {
@@ -150,7 +157,7 @@ public class TransactionDashboardView {
         }
 
         ScrollPane scroll = new ScrollPane(listBox);
-        scroll.setPrefHeight(200);
+        scroll.setPrefHeight(600);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
 
