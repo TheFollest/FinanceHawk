@@ -65,23 +65,23 @@ public class main2test extends Application {
     }
 
     private void showBudgetDashboard() {
-        VBox root = BudgetDashboardView.create(account, this::navigate, this::showDashboard);
+        VBox root = BudgetDashboardView.create(account, this::navigate, this::showBudgetDashboard);
         updateScene(root, "Finance Hawk - Budget");
     }
 
     private void showTransactionDashboard() {
-        VBox root = TransactionDashboardView.create(account, this::navigate, this::showDashboard);
+        VBox root = TransactionDashboardView.create(account, this::navigate, this::showTransactionDashboard);
         updateScene(root, "Finance Hawk - Transactions");
     }
 
     private void showSearchDashboard() {
-        VBox root = SearchDashboardView.create(account, this::navigate, this::showDashboard);
+        VBox root = SearchDashboardView.create(account, this::navigate, this::showSearchDashboard);
         updateScene(root, "Finance Hawk - Search");
     }
     
     private void showRecurrDashboardView() {
         // The onRefresh parameter calls the method again to rebuild the scene with updated data
-        VBox root = RecurrDashboardView.create(recurrRule, this::navigate, this::showDashboard);
+        VBox root = RecurrDashboardView.create(recurrRule, this::navigate, this::showRecurrDashboardView);
         updateScene(root, "Finance Hawk - Recurring Rules");
     }
     
