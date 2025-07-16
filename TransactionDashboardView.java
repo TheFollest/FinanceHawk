@@ -44,9 +44,6 @@ public class TransactionDashboardView {
         CheckBox incomeCheck = new CheckBox("Is Income?");
         incomeCheck.setTextFill(Color.WHITE);
 
-        CheckBox recurringCheck = new CheckBox("Recurring Transaction?");
-        recurringCheck.setTextFill(Color.WHITE);
-
         Label noteLabel = new Label("Note:");
         noteLabel.setTextFill(Color.WHITE);
         TextField noteField = new TextField();
@@ -93,7 +90,6 @@ public class TransactionDashboardView {
 
                 amountField.clear();
                 noteField.clear();
-                recurringCheck.setSelected(false);
                 incomeCheck.setSelected(false);
                 categoryCombo.setValue(null);
                 datePicker.setValue(LocalDate.now());
@@ -112,7 +108,6 @@ public class TransactionDashboardView {
                 new HBox(10, categoryLabel, categoryCombo),
                 new HBox(10, dateLabel, datePicker),
                 incomeCheck,
-                recurringCheck,
                 noteRow,
                 addBtn,
                 feedback
