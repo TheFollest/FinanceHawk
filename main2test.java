@@ -2,13 +2,10 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
-import java.util.ArrayList; 
-import java.util.List; 
+import java.util.ArrayList;
+import java.util.List;
 
 public class main2test extends Application {
 
@@ -17,7 +14,7 @@ public class main2test extends Application {
     private boolean wasMaximized = false;
     private double prevWidth = 800;
     private double prevHeight = 700;
-    
+
     private List<RecurringTransaction> recurrRule = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -28,24 +25,23 @@ public class main2test extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         seedData();
-        
-        //Sync recurring transactions
+
+        // Sync recurring transactions
         RecurrSync.syncRecurringTransactions(account, recurrRule);
-   
-        
+
         primaryStage.setTitle("Finance Hawk");
         primaryStage.setWidth(prevWidth);
         primaryStage.setHeight(prevHeight);
         primaryStage.setResizable(true);
 
-        VBox root = DashboardView.create(account, this::navigate);
+        VBox root = DashboardView.create(account, recurrRule, this::navigate);
         Scene scene = new Scene(root, prevWidth, prevHeight);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     private void seedData() {
-    	account.addBudget(new Budget("June Grocery Budget", 300.0, Category.GROCERIES, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
+        account.addBudget(new Budget("June Grocery Budget", 300.0, Category.GROCERIES, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
         account.addBudget(new Budget("July Grocery Budget", 350.0, Category.GROCERIES, LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 31)));
         account.addBudget(new Budget("June Fun Budget", 150.0, Category.ENTERTAINMENT, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
 
@@ -54,13 +50,12 @@ public class main2test extends Application {
         account.addTransaction(new Transaction(Category.GROCERIES, 230.00, LocalDate.of(2025, 6, 6), false, ""));
         account.addTransaction(new Transaction(Category.ENTERTAINMENT, 75.50, LocalDate.of(2025, 6, 9), false, ""));
         account.addTransaction(new Transaction(Category.OTHER, 100.00, LocalDate.of(2025, 6, 10), false, "Birthday gift for Alex"));
-        
-        //recurrRule.add(new RecurringTransaction("Monthly Rent", 1200.00, LocalDate.of(2025, 1, 1), RecurringTransaction.Frequency.MONTHLY, -1));
+
         recurrRule.add(new RecurringTransaction("Netflix", 15.99, LocalDate.of(2025, 1, 15), RecurringTransaction.Frequency.MONTHLY, -1));
     }
 
     private void showDashboard() {
-        VBox root = DashboardView.create(account, this::navigate);
+        VBox root = DashboardView.create(account, recurrRule, this::navigate);
         updateScene(root, "Finance Hawk - Dashboard");
     }
 
@@ -78,13 +73,11 @@ public class main2test extends Application {
         VBox root = SearchDashboardView.create(account, this::navigate, this::showSearchDashboard);
         updateScene(root, "Finance Hawk - Search");
     }
-    
+
     private void showRecurrDashboardView() {
-        // The onRefresh parameter calls the method again to rebuild the scene with updated data
         VBox root = RecurrDashboardView.create(recurrRule, this::navigate, this::showRecurrDashboardView);
         updateScene(root, "Finance Hawk - Recurring Rules");
     }
-    
 
     private void updateScene(VBox root, String title) {
         Scene scene = new Scene(root, prevWidth, prevHeight);
