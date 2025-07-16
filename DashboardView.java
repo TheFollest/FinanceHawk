@@ -285,7 +285,7 @@ private static VBox buildBudgetBars(Account account) {
         List<Transaction> transactions = (List<Transaction>) field.get(account);
 
         int count = 0;
-        for (int i = transactions.size() - 1; i >= 0 && count < transactions.size(); i--, count++) {
+        for (int i = transactions.size() - 1; i >= 0 && count < 10; i--, count++) {
             Transaction t = transactions.get(i);
             Label l = new Label(t.toString());
             l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
