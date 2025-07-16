@@ -22,7 +22,7 @@ public class DashboardView {
         dashboard.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
         dashboard.getChildren().addAll(
-            buildButtonBar(onNavigate),
+            buildButtonBar(onNavigate,"dashboard"),
             buildHeader(account),
             buildSpendingChart(account),
             buildBudgetBars(account),
@@ -34,25 +34,36 @@ public class DashboardView {
         return dashboard;
     }
 
-    private static HBox buildButtonBar(Consumer<String> onNavigate) {
+    private static HBox buildButtonBar(Consumer<String> onNavigate, String currentPage) {
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_RIGHT);
+        buttons.setPadding(new Insets(0, 0, 10, 0));
+
+        Button dashboardBtn = new Button("Dashboard");
+        dashboardBtn.setOnAction(e -> onNavigate.accept("dashboard"));
+        dashboardBtn.setDisable("dashboard".equals(currentPage));
 
         Button budgetBtn = new Button("Budget");
         budgetBtn.setOnAction(e -> onNavigate.accept("budget"));
+        budgetBtn.setDisable("budget".equals(currentPage));
 
         Button transactionBtn = new Button("Transactions");
         transactionBtn.setOnAction(e -> onNavigate.accept("transactions"));
+        transactionBtn.setDisable("transactions".equals(currentPage));
 
         Button searchBtn = new Button("Search");
         searchBtn.setOnAction(e -> onNavigate.accept("search"));
-        
+        searchBtn.setDisable("search".equals(currentPage));
+
         Button recurringBtn = new Button("Recurring");
         recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
+        recurringBtn.setDisable("recurring".equals(currentPage));
 
-        buttons.getChildren().addAll(budgetBtn, transactionBtn, searchBtn, recurringBtn);
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
         return buttons;
     }
+
+
 
     private static HBox buildHeader(Account account) {
         double balance = account.getBalance();
@@ -278,7 +289,7 @@ public class DashboardView {
             e.printStackTrace();
         }
 
-        if (alerts.getChildren().size() == 1) {
+        if (alerts.getChildren().size() == 0) {
             Label none = new Label("No alerts at the moment.");
             none.setTextFill(Color.LIGHTGREEN);
             alerts.getChildren().add(none);

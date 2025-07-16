@@ -19,7 +19,7 @@ public class TransactionDashboardView {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
-        layout.getChildren().add(buildButtonBar(onNavigate));
+        layout.getChildren().add(buildButtonBar(onNavigate,"transactions"));
 
         Label title = new Label("Transaction Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 28));
@@ -163,24 +163,32 @@ public class TransactionDashboardView {
         return layout;
     }
 
-    private static HBox buildButtonBar(Consumer<String> onNavigate) {
+     private static HBox buildButtonBar(Consumer<String> onNavigate, String currentPage) {
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.setPadding(new Insets(0, 0, 10, 0));
 
         Button dashboardBtn = new Button("Dashboard");
         dashboardBtn.setOnAction(e -> onNavigate.accept("dashboard"));
+        dashboardBtn.setDisable("dashboard".equals(currentPage));
 
         Button budgetBtn = new Button("Budget");
         budgetBtn.setOnAction(e -> onNavigate.accept("budget"));
+        budgetBtn.setDisable("budget".equals(currentPage));
 
         Button transactionBtn = new Button("Transactions");
-        transactionBtn.setDisable(true);
+        transactionBtn.setOnAction(e -> onNavigate.accept("transactions"));
+        transactionBtn.setDisable("transactions".equals(currentPage));
 
         Button searchBtn = new Button("Search");
         searchBtn.setOnAction(e -> onNavigate.accept("search"));
+        searchBtn.setDisable("search".equals(currentPage));
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn);
+        Button recurringBtn = new Button("Recurring");
+        recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
+        recurringBtn.setDisable("recurring".equals(currentPage));
+
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
         return buttons;
     }
 }

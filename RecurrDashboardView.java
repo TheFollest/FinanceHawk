@@ -27,7 +27,7 @@ public class RecurrDashboardView {
         VBox inputForm = buildInputForm(definitions, onRefresh);
 
         layout.getChildren().addAll(
-                buildButtonBar(onNavigate),
+                buildButtonBar(onNavigate, "recurring"),
                 title,
                 new Label("Manage Recurring Rules") {{ setTextFill(Color.LIGHTGRAY); }},
                 ruleListView,
@@ -38,23 +38,32 @@ public class RecurrDashboardView {
         return layout;
     }
 
-    private static HBox buildButtonBar(Consumer<String> onNavigate) {
+   private static HBox buildButtonBar(Consumer<String> onNavigate, String currentPage) {
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.setPadding(new Insets(0, 0, 10, 0));
 
         Button dashboardBtn = new Button("Dashboard");
         dashboardBtn.setOnAction(e -> onNavigate.accept("dashboard"));
+        dashboardBtn.setDisable("dashboard".equals(currentPage));
+
         Button budgetBtn = new Button("Budget");
         budgetBtn.setOnAction(e -> onNavigate.accept("budget"));
+        budgetBtn.setDisable("budget".equals(currentPage));
+
         Button transactionBtn = new Button("Transactions");
         transactionBtn.setOnAction(e -> onNavigate.accept("transactions"));
-        Button recurringBtn = new Button("Recurring");
-        recurringBtn.setDisable(true); // Disable the current view's button
+        transactionBtn.setDisable("transactions".equals(currentPage));
+
         Button searchBtn = new Button("Search");
         searchBtn.setOnAction(e -> onNavigate.accept("search"));
+        searchBtn.setDisable("search".equals(currentPage));
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, recurringBtn, searchBtn);
+        Button recurringBtn = new Button("Recurring");
+        recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
+        recurringBtn.setDisable("recurring".equals(currentPage));
+
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
         return buttons;
     }
 
