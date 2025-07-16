@@ -41,10 +41,14 @@ public class BudgetDashboardView {
 
         VBox budgetBoxContainer = new VBox();
         refreshBudgetBars(account, budgetBoxContainer, totalLabel);
+        ScrollPane scrollPane = new ScrollPane(budgetBoxContainer);
+        scrollPane.setPrefHeight(300);  // ⬅️ Adjust height as needed
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
         VBox inputForm = buildInputForm(account, () -> refreshBudgetBars(account, budgetBoxContainer, totalLabel));
 
-        layout.getChildren().addAll(title, totalLabel, budgetBoxContainer, inputForm);
+        layout.getChildren().addAll(title, totalLabel, scrollPane, inputForm);
         return layout;
     }
 
