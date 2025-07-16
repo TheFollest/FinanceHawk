@@ -114,8 +114,9 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     """);
 
     PieChart chart = new PieChart();
-    chart.setTitle("Expenses by Category");
-
+    chart.setTitle("Expenses by Category (Click a slice to filter)");
+	
+	/*Put aside as a separate class
     Map<String, String> categoryColors = new HashMap<>();
     categoryColors.put("SALARY", "#ffee58");
     categoryColors.put("FREELANCE", "#c0ca33");
@@ -128,6 +129,7 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     categoryColors.put("TRANSPORT", "#7cb342");
     categoryColors.put("MEDICAL", "#66bb6a");
     categoryColors.put("OTHER", "#42a5f5");
+	*/
 
     for (Category cat : Category.values()) {
         double amount = account.FilterCategory(cat, false);
@@ -143,10 +145,17 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     chart.layout();
 
     for (PieChart.Data data : chart.getData()) {
-        String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
+        //String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
+		String color = getCategoryColor(data.getName()); 
         data.getNode().setStyle("-fx-pie-color: " + color + ";");
+		
+        // Updated Jul 16: Click listener to show filtered transactions
+        data.getNode().setOnMouseClicked(event -> {
+            showFilteredTransactions(account, data.getName());
+        });
     }
-
+	
+	/*
     Platform.runLater(() -> {
         chart.lookupAll(".chart-pie-label").forEach(node -> {
             if (node instanceof Labeled labeled) {
@@ -154,8 +163,25 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
             }
         });
     });
+	*/
+	
+	Platform.runLater(() -> {
+        // Find the title label by its style class and set its color
+        Label titleNode = (Label) chart.lookup(".chart-title");
+        if (titleNode != null) {
+            titleNode.setStyle("-fx-text-fill: white;");
+        }
 
-    HBox legend = new HBox(15);
+        // Also ensure the pie slice labels are white
+        chart.lookupAll(".chart-pie-label").forEach(node -> {
+            node.setStyle("-fx-fill: white;"); // Force to set color to white
+        });
+    });
+	
+
+
+    /* Put aside as a separate class
+	HBox legend = new HBox(15);
     legend.setPadding(new Insets(10));
     legend.setAlignment(Pos.CENTER);
     legend.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10;");
@@ -174,13 +200,52 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         entry.setAlignment(Pos.CENTER);
         legend.getChildren().add(entry);
     }
-
+	*/
+	
+	// Build the custom legend
+    HBox legend = buildChartLegend(chart);
     chartContainer.getChildren().addAll(chart, legend);
     return chartContainer;
-}
+	
+	
+  }
+	//Helper method to get category color
+	private static String getCategoryColor(String categoryName) {
+		Map<String, String> categoryColors = new HashMap<>();
+		categoryColors.put("SALARY", "#ffee58");
+		categoryColors.put("RENT", "#d32f2f");
+		categoryColors.put("GROCERIES", "#ff704d");
+		categoryColors.put("UTILITIES", "#8e24aa");
+		categoryColors.put("ENTERTAINMENT", "#ffa726");
+		categoryColors.put("DINING", "#5c6bc0");
+		categoryColors.put("SUBSCRIPTION", "#26c6da");
+		categoryColors.put("TRANSPORT", "#7cb342");
+		categoryColors.put("MEDICAL", "#66bb6a");
+		categoryColors.put("OTHER", "#42a5f5");
+		return categoryColors.getOrDefault(categoryName.toUpperCase(), "#bdbdbd");
+	}
+	
+	// Helper method to build the legend
+	private static HBox buildChartLegend(PieChart chart) {
+		HBox legend = new HBox(15);
+		legend.setPadding(new Insets(10));
+		legend.setAlignment(Pos.CENTER);
+		legend.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10;");
 
-
-    private static VBox buildIncomeExpenseSummary(Account account) {
+		for (PieChart.Data data : chart.getData()) {
+			Label label = new Label(data.getName());
+			label.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+			Region colorBox = new Region();
+			colorBox.setPrefSize(10, 10);
+			colorBox.setStyle("-fx-background-color: " + getCategoryColor(data.getName()) + ";");
+			HBox entry = new HBox(5, colorBox, label);
+			entry.setAlignment(Pos.CENTER);
+			legend.getChildren().add(entry);
+		}
+		return legend;
+	}
+    
+	private static VBox buildIncomeExpenseSummary(Account account) {
         VBox container = new VBox(10);
         container.setAlignment(Pos.CENTER);
         container.setPadding(new Insets(10));
@@ -215,6 +280,28 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         container.getChildren().addAll(title, incomeLabel, incomeBar, expenseLabel, expenseBar);
         return container;
     }
+	
+	//show the filter results in a new window
+	private static void showFilteredTransactions(Account account, String categoryName) {
+		Category category = Category.valueOf(categoryName.toUpperCase());
+		Search search = new Search(account.getTransactions());
+		List<Transaction> results = search.filterByCategory(category);
+
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Filtered Transactions");
+		alert.setHeaderText("Transactions for category: " + categoryName);
+
+		ListView<String> listView = new ListView<>();
+		if (results.isEmpty()) 
+			listView.getItems().add("No transactions found for this category.");
+		else {
+			for (Transaction t : results) 
+				listView.getItems().add(t.toString());
+		}
+
+    alert.getDialogPane().setContent(listView);
+    alert.showAndWait();
+	}
 
 // Change method signature to match:
 private static VBox buildBudgetBars(Account account) {
