@@ -48,7 +48,7 @@ OUR PRODUCT is straightforward and gives you everything you need to manage your 
 
 ## How to Use the App
 
-- Start with `main2test.java`
+- Start with `Main.java`
 - To manage:
   - Transactions: Open `TransactionDashboardView.java`
   - Budgets: Use `BudgetDashboardView.java`
