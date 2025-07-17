@@ -46,7 +46,7 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     // Build the full dashboard
     dashboard.getChildren().addAll(
         buildButtonBar(onNavigate, "dashboard"),
-        buildHeader(account),
+		buildHeader(account),
         buildSpendingChart(account),
         budgetAndRecurringRow,
         bottomRow
@@ -95,8 +95,7 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 28));
         header.setTextFill(Color.WHITE);
         header.setEffect(new DropShadow());
-
-        HBox headerBox = new HBox(header);
+		HBox headerBox = new HBox(header);
         headerBox.setAlignment(Pos.CENTER_LEFT);
         return headerBox;
     }

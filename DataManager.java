@@ -1,167 +1,149 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class DataManager {
-	
-	//saves EVERY transaction in a list
-	public static void saveTransactions(List<Transaction> t, File tFile) throws IOException
-	{
-		FileWriter fw = new FileWriter(tFile, true);
-		PrintWriter pw = new PrintWriter(fw);
-		for (int i = 0; i < t.size(); i++)
-		{
-			pw.println(t.get(i));
-		}
-		pw.close();
-	}
-	
-	//saves EVERY budget in a list
-	public static void saveBudget(List<Budget> t, File tFile) throws IOException
-	{
-		FileWriter fw = new FileWriter(tFile, true);
-		PrintWriter pw = new PrintWriter(fw);
-		for (int i = 0; i < t.size(); i++)
-		{
-			pw.println(t.get(i));
-		}
-		pw.close();
-	}
+    private static final String SEPARATOR = "|";
+    private static final String TRANSACTIONS_FILE = "transactions.txt";
+	private static final String BUDGETS_FILE = "budgets.txt";
+    private static final String RECURRING_RULES_FILE = "recurring_rules.txt";
 
-	//adds one transaction to the transaction file
-	public static void addTrans(Transaction t, File tFile)throws IOException
-	{
+    // Main method to save all application data
+    public static void saveAllData(Account account, List<RecurringTransaction> recurrRules) {
+        saveTransactions(account.getTransactions());
+        saveBudgets(account.getBudgets()); 
+        saveRecurringRules(recurrRules);
+    }
+	
+	//Remove addTrans and addBudg class
+
+
+    // Saves ALL transactions currently in the account to a file
+    private static void saveTransactions(List<Transaction> transactions) {
+		/*Put into try catch block. Also, use for loops with list of transactions
 		FileWriter fw = new FileWriter(tFile, true);
 		PrintWriter pw = new PrintWriter(fw);
-		pw.println(t);
-		pw.close();
-	}
+		for (int i = 0; i < t.size(); i++)
+		{
+			pw.println(t.get(i));
+		}
+		pw.close();*/
+        try (PrintWriter pw = new PrintWriter(new FileWriter(TRANSACTIONS_FILE))) {
+            for (Transaction t : transactions) {
+                
+                String line = String.join(SEPARATOR,
+                        t.getCategory().toString(),
+                        String.valueOf(t.getAmount()),
+                        t.getDate().toString(),
+                        String.valueOf(t.isIncome()),
+                        t.getDescription());
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving transactions: " + e.getMessage());
+        }
+    }
 	
-	//adds one budget to the budget file
-	public static void addBudg(Budget t, File tFile)throws IOException
-	{
-		FileWriter fw = new FileWriter(tFile);
-		PrintWriter pw = new PrintWriter(fw);
-		pw.println(t);
-		pw.close();
-	}
+    //Saves budget data
+	//Same way with saves all Transactions
+	private static void saveBudgets(List<Budget> budgets) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(BUDGETS_FILE))) {
+            for (Budget b : budgets) {
+                String line = String.join(SEPARATOR, b.getName(), String.valueOf(b.getLimit()),
+                        b.getCategory().toString(), b.getStartDate().toString(), b.getEndDate().toString());
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving budgets: " + e.getMessage());
+        }
+    }	
+
+    // Saves the definitions for recurring transactions
+    private static void saveRecurringRules(List<RecurringTransaction> rules) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(RECURRING_RULES_FILE))) {
+            for (RecurringTransaction r : rules) {
+                String line = String.join(SEPARATOR,
+                    r.getDescription(), r.getCategory().toString(), String.valueOf(r.getAmount()), 
+                    r.getStartDate().toString(), r.getFrequency().toString(), 
+                    String.valueOf(r.getMaxOccurrences()), String.valueOf(r.isIncome()));
+				pw.println(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving recurring rules: " + e.getMessage());
+        }
+    }
 	
-	//loads all transactions currently saved into the txt file into a list
-	public static List<Transaction> loadTransactions(File f) throws IOException
-	{
+	// Main method to load all data into the application
+    public static void loadAllData(Account account, List<RecurringTransaction> recurrRules) {
+        loadTransactions(account);
+        loadBudgets(account); // Now loads budgets into the account
+        loadRecurringRules(recurrRules);
+    }
+
+    // Loads transactions from the file into the account
+    private static void loadTransactions(Account account) {
+        File f = new File(TRANSACTIONS_FILE);
+        if (!f.exists()) return;
+        
+		/* Combine 3 lines. Also, put codes into try/catch block
 		BufferedReader reader = new BufferedReader(new FileReader(f));
 		String l = reader.readLine();
-		List<Transaction> t = new ArrayList<>();
-		Scanner scan = new Scanner(f);
-		String[] x = scan.nextLine().split(" ");
-		boolean income = true;
-		String des = "";
-		double y = -1;
-		Category z = null;
-		
 		while (l !=	null)
-		{
-			if (String.valueOf(x[0].charAt(0)).equals("I"))
-			{
-				income = true;
-			}
-			else
-			{
-				income = false;
-			}
-			for (Category i : Category.values())
-			{
-				try 
-				{
-					if (i == (Category.valueOf(x[1])))
-					{
-						z = Category.valueOf(x[1]);
-						break;
-					}
-				}
-				catch (Exception IllegalArgumentException)
-				{
-					z = Category.OTHER;
-					for (int j = 1; j < x.length -4; j++)
-					{
-						des = des + x[j] + " ";
-					}
-					break;
-				}
-			}
-			String[] date = x[x.length-1].split("-");
-			y = Double.parseDouble(x[x.length-3].substring(1));
-			if (scan.hasNextLine())
-			{
-				x = scan.nextLine().split(" ");
-			}
-			l = reader.readLine();
-			Transaction t1 = new Transaction(z, y, LocalDate.of(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2])), income, des);
-			t.add(t1);
-			des = "";
-		}
-		scan.close();
-		reader.close();
-		return t;
-	}
+		*/
+		try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+				//Reach each line and split into parts, Separator is |
+                String[] parts = line.split("\\" + SEPARATOR);
+                if (parts.length == 5) {
+                    //Put each part into value of a transaction
+					Transaction t = new Transaction(Category.valueOf(parts[0]), Double.parseDouble(parts[1]),
+                            LocalDate.parse(parts[2]), Boolean.parseBoolean(parts[3]), parts[4]);
+                    account.addTransaction(t);
+                }
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Error loading transactions: " + e.getMessage());
+        }
+    }
 	
-	//Loads all budgets currently saved into a text file into the list
-	public static List<Budget> loadBudgets(File f) throws IOException
-	{
-		List<Budget> b = new ArrayList<>();
-		BufferedReader reader = new BufferedReader(new FileReader(f));
-		String l = reader.readLine();
-		Scanner scan = new Scanner(f);
-		String[] x = scan.nextLine().split(" ");
-		String des = "";
-		double y = -1;
-		Category z = null;
-		while (l != null)
-		{
-			for (Category i : Category.values())
-			{
-					if (i == (Category.valueOf(x[x.length-4].substring(1, x[x.length-4].length()-2))))
-					{
-						z = i;
-						break;
-					}
-			}
-			for (int i = 0; i < x.length-4; i++)
-			{
-				des = des + x[i] + " ";
-			}
-			y = Double.parseDouble(x[x.length-1].substring(1));
-			Budget b1 = new Budget(des, y, z);
-			b.add(b1);
-			if (scan.hasNextLine())
-			{
-				x = scan.nextLine().split(" ");
-			}
-			
-			des = "";
-			l = reader.readLine();
+	// Loads budget data
+    private static void loadBudgets(Account account) {
+        File f = new File(BUDGETS_FILE);
+        if (!f.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + SEPARATOR);
+                if (parts.length == 5) {
+                    Budget b = new Budget(parts[0], Double.parseDouble(parts[1]), Category.valueOf(parts[2]),
+                            LocalDate.parse(parts[3]), LocalDate.parse(parts[4]));
+                    account.addBudget(b); // Add loaded budget to the account
+                }
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Error loading budgets: " + e.getMessage());
+        }
+    }	
 
-		}
-		scan.close();
-		reader.close();
-		return b;
-		
-	}
-	
-	//clears the text in a file
-	public static void clearFile(File f) throws FileNotFoundException
-	{
-		PrintWriter writer = new PrintWriter(f);
-		writer.print("");
-		writer.close();
-	}
-	
+    // Loads recurring transaction rules
+    private static void loadRecurringRules(List<RecurringTransaction> rules) {
+        File f = new File(RECURRING_RULES_FILE);
+        if (!f.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\" + SEPARATOR);
+                if (parts.length == 7) {
+                    rules.add(new RecurringTransaction(parts[0], Category.valueOf(parts[1]), 
+                        Double.parseDouble(parts[2]), LocalDate.parse(parts[3]), 
+                        RecurringTransaction.Frequency.valueOf(parts[4]), Integer.parseInt(parts[5]), 
+                        Boolean.parseBoolean(parts[6])));
+                }
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Error loading recurring rules: " + e.getMessage());
+        }
+    }
 }

@@ -51,6 +51,22 @@ public class Budget {
     public void removeTransaction(Transaction t) {
         this.transactions.remove(t);
     }
+	
+	public double getLimit() {
+		return this.limit;
+	}
+
+	public LocalDate getStartDate() {
+		return this.startDate;
+	}
+
+	public LocalDate getEndDate() {
+		return this.endDate;
+	}
+	
+	public Category getCategory() { 
+		return this.category; 
+	}
     
 	@Override
     public String toString() {

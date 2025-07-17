@@ -98,4 +98,9 @@ public class Account {
     public double getTotalExpenses() {
         return FilterCategory(null, false);
     }
+	
+	public List<Budget> getBudgets() {
+		return this.budgets;
+	}
+	
 }

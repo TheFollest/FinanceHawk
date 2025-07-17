@@ -1,3 +1,4 @@
+import java.util.Objects;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +16,20 @@ public class RecurringTransaction {
     private LocalDate startDate;
     private Frequency frequency;
     private int maxOccurrences; // -1 for infinite
+	private boolean isIncome;
+	private Category category;
     private List<Transaction> transactionHistory;
 
-    public RecurringTransaction(String description, double amount, LocalDate startDate,
-                                Frequency frequency, int maxOccurrences) {
+    public RecurringTransaction(String description, Category category, double amount, LocalDate startDate,
+                                Frequency frequency, int maxOccurrences, boolean isIncome) {
         this.description = description;
+		this.category = category;
         this.amount = amount;
         this.startDate = startDate;
         this.frequency = frequency;
         this.maxOccurrences = maxOccurrences;
-        this.transactionHistory = new ArrayList<>();
+        this.isIncome = isIncome;
+		this.transactionHistory = new ArrayList<>();
         //generateInitialTransaction();
     }
 
@@ -64,7 +69,7 @@ public class RecurringTransaction {
                 break; 
             }
 
-        	transactionHistory.add(new Transaction(description, amount, currentDate));
+        	transactionHistory.add(new Transaction(this.category, this.amount, currentDate, this.isIncome, this.description));
         	currentDate = getNextDate(currentDate);
         	// occurrences++; 
        //=============================================================
@@ -111,7 +116,33 @@ public class RecurringTransaction {
     public int getMaxOccurrences() {
         return maxOccurrences;
     }
+	
+	public boolean isIncome() { 
+		return isIncome; 
+	} 	
+	
+	public Category getCategory() { 
+		return category; 
+	} 
 
+	
+	@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecurringTransaction that = (RecurringTransaction) o;
+        return Double.compare(that.amount, amount) == 0 && 
+			   maxOccurrences == that.maxOccurrences && 
+			   isIncome == that.isIncome && 
+			   Objects.equals(description, that.description) && 
+			   Objects.equals(startDate, that.startDate) && 
+			   frequency == that.frequency &&
+			   category == that.category;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, category, amount, startDate, frequency, maxOccurrences, isIncome);
+    }
 }
 

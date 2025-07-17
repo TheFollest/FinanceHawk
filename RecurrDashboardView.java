@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class RecurrDashboardView {
 
-    public static VBox create(List<RecurringTransaction> definitions, Consumer<String> onNavigate, Runnable onRefresh) {
+    public static VBox create(Account account, List<RecurringTransaction> definitions, Consumer<String> onNavigate, Runnable onRefresh) {
         VBox layout = new VBox(20);
         layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.TOP_CENTER);
@@ -25,11 +25,25 @@ public class RecurrDashboardView {
 
         VBox ruleListView = buildRuleListView(definitions, onRefresh);
         VBox inputForm = buildInputForm(definitions, onRefresh);
+		
+		Button syncButton = new Button("Sync");
+        syncButton.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        syncButton.setOnAction(e -> {
+            RecurrSync.syncRecurringTransactions(account, definitions);
+            onNavigate.accept("dashboard"); // Go to dashboard to see updated balance
+        });
+		
+		HBox manageHeader = new HBox(
+            new Label("Manage Recurring Rules") {{ setTextFill(Color.LIGHTGRAY); }},
+            new Region() {{ HBox.setHgrow(this, Priority.ALWAYS); }}, // Spacer
+            syncButton
+        );
+        manageHeader.setAlignment(Pos.CENTER_LEFT);
 
         layout.getChildren().addAll(
                 buildButtonBar(onNavigate, "recurring"),
                 title,
-                new Label("Manage Recurring Rules") {{ setTextFill(Color.LIGHTGRAY); }},
+                manageHeader,
                 ruleListView,
                 new Separator(),
                 new Label("Add New Rule") {{ setFont(Font.font("Segoe UI", FontWeight.BOLD, 18)); setTextFill(Color.WHITE); }},
@@ -110,32 +124,51 @@ public class RecurrDashboardView {
 
         TextField descField = new TextField();
         descField.setPromptText("e.g., Monthly Rent");
+		ComboBox<Category> categoryBox = new ComboBox<>();
+		categoryBox.getItems().setAll(Category.values());
         TextField amountField = new TextField();
         amountField.setPromptText("e.g., 1200.00");
         DatePicker datePicker = new DatePicker(LocalDate.now());
+		
         ComboBox<RecurringTransaction.Frequency> freqBox = new ComboBox<>();
         freqBox.getItems().setAll(RecurringTransaction.Frequency.values());
         freqBox.setValue(RecurringTransaction.Frequency.MONTHLY); // Default value
+		
+		CheckBox incomeCheck = new CheckBox("Is Income?");
+		incomeCheck.setTextFill(Color.WHITE);
 
-        grid.add(new Label("Description:") {{ setTextFill(Color.WHITE); }}, 0, 0);
-        grid.add(descField, 1, 0);
-        grid.add(new Label("Amount:") {{ setTextFill(Color.WHITE); }}, 0, 1);
-        grid.add(amountField, 1, 1);
-        grid.add(new Label("Start Date:") {{ setTextFill(Color.WHITE); }}, 0, 2);
-        grid.add(datePicker, 1, 2);
-        grid.add(new Label("Frequency:") {{ setTextFill(Color.WHITE); }}, 0, 3);
-        grid.add(freqBox, 1, 3);
+        grid.add(new Label("Description:") {{ setTextFill(Color.WHITE); }}, 0, 0); // Row 0
+		grid.add(descField, 1, 0);
+
+		grid.add(new Label("Category:") {{ setTextFill(Color.WHITE); }}, 0, 1);    // Row 1
+		grid.add(categoryBox, 1, 1);
+
+		grid.add(new Label("Amount:") {{ setTextFill(Color.WHITE); }}, 0, 2);      // Row 2
+		grid.add(amountField, 1, 2);
+
+		grid.add(new Label("Start Date:") {{ setTextFill(Color.WHITE); }}, 0, 3);  // Row 3
+		grid.add(datePicker, 1, 3);
+
+		grid.add(new Label("Frequency:") {{ setTextFill(Color.WHITE); }}, 0, 4); // Row 4
+		grid.add(freqBox, 1, 4);
+
+		grid.add(incomeCheck, 1, 5);        
+		
+		
 
         Button addButton = new Button("Add New Rule");
         addButton.setOnAction(e -> {
             try {
                 String desc = descField.getText();
+				Category category = categoryBox.getValue();
                 double amount = Double.parseDouble(amountField.getText());
                 LocalDate date = datePicker.getValue();
                 RecurringTransaction.Frequency freq = freqBox.getValue();
+				
+				boolean isIncome = incomeCheck.isSelected();
 
                 if (!desc.isEmpty() && date != null && freq != null) {
-                    definitions.add(new RecurringTransaction(desc, amount, date, freq, -1));
+                    definitions.add(new RecurringTransaction(desc, category, amount, date, freq, -1, isIncome));
                     onRefresh.run(); // Refresh the view to show the new rule
                 }
             } catch (NumberFormatException ex) {
