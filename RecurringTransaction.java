@@ -30,31 +30,11 @@ public class RecurringTransaction {
         this.maxOccurrences = maxOccurrences;
         this.isIncome = isIncome;
 		this.transactionHistory = new ArrayList<>();
-        //generateInitialTransaction();
+        
     }
-
-    // Generate initial transaction
-    /*private void generateInitialTransaction() {
-		//(Updated Jul 10)transactionHistory.add(new Transaction(description, amount, startDate));
-		LocalDate date = startDate;
-        for (int i = 0; i < maxOccurrences; i++) {
-            transactionHistory.add(new Transaction(Category.OTHER, amount, date, false, description));
-            date = getNextDate(date);
-		}
-        //====================================
-    }
-    */
 
     // Generate transactions up to a specific date
     public void generateTransactionsUntil(LocalDate endDate) {
-        /*(Updated Jul 10) LocalDate currentDate = startDate;
-          int occurrences = transactionHistory.size();
-        
-        while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
-            if (maxOccurrences != -1 && occurrences >= maxOccurrences) {
-                break;
-            }
-         */
         LocalDate currentDate;
         if (transactionHistory.isEmpty()) {
             currentDate = startDate;
@@ -71,8 +51,6 @@ public class RecurringTransaction {
 
         	transactionHistory.add(new Transaction(this.category, this.amount, currentDate, this.isIncome, this.description));
         	currentDate = getNextDate(currentDate);
-        	// occurrences++; 
-       //=============================================================
         }
     }
 
@@ -92,9 +70,7 @@ public class RecurringTransaction {
 
     // Get transaction history
     public List<Transaction> getTransactionHistory() {
-		//(Updated Jul 10)return new ArrayList<>(transactionHistory);
 		return transactionHistory;
-		//==============================
     }
     
     public String getDescription() {

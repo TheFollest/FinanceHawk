@@ -93,7 +93,6 @@ public class TransactionDashboardView {
 
                 Transaction txn = new Transaction(category, amount, date, isIncome, note);
                 List<String> notifications = account.addTransaction(txn);
-				//account.addTransaction(txn);
                 feedback.setTextFill(Color.LIGHTGREEN);
                 feedback.setText("Transaction added!");
 				

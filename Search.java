@@ -36,9 +36,7 @@ public class Search {
     // Filter transactions by category
     public List<Transaction> filterByCategory(Category category) {
         return transactions.stream()
-                //(updated Jul 10).filter(t -> t.getCategory().equalsIgnoreCase(category))
                 .filter(t -> t.getCategory() == category)
-                //===========================
 				.collect(Collectors.toList());
     }
 

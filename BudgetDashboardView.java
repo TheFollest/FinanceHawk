@@ -29,27 +29,17 @@ public class BudgetDashboardView {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
-        //layout.getChildren().add(buildButtonBar(onNavigate, "budget"));
-
         Label title = new Label("Budget Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 30));
         title.setTextFill(Color.WHITE);
-
-        //Label totalLabel = new Label("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
-        //totalLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
-        //totalLabel.setTextFill(Color.LIGHTGREEN);	
-        //VBox budgetBoxContainer = new VBox();
-		//refreshBudgetBars(account, budgetBoxContainer, totalLabel);
-		
+	
         VBox budgetListContainer = buildBudgetList(account, onNavigate);
         ScrollPane scrollPane = new ScrollPane(budgetListContainer);
         scrollPane.setPrefHeight(300);  
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
-        //VBox inputForm = buildInputForm(account, () -> refreshBudgetBars(account, budgetBoxContainer, totalLabel));
-        //layout.getChildren().addAll(title, totalLabel, scrollPane, inputForm);
-         VBox inputForm = buildInputForm(account, () -> onNavigate.accept("budget"));
+        VBox inputForm = buildInputForm(account, () -> onNavigate.accept("budget"));
 
         layout.getChildren().addAll(
             buildButtonBar(onNavigate, "budget"), title, scrollPane,inputForm);
@@ -139,11 +129,10 @@ public class BudgetDashboardView {
             e.printStackTrace();
         }
     }
-// This method now builds the list of budget bars
+
     private static VBox buildBudgetList(Account account, Consumer<String> onNavigate) {
         VBox container = new VBox(10);
         
-        // Use the safe getter method instead of reflection
         List<Budget> budgets = account.getBudgets();
 
         for (Budget budget : budgets) {
@@ -153,17 +142,14 @@ public class BudgetDashboardView {
 
             ProgressBar bar = new ProgressBar(percent);
             bar.setPrefWidth(400);
-            
-            // Use the budget's own toString for the label
+
             Label label = new Label(budget.toString());
             label.setTextFill(Color.WHITE);
 
             Button deleteBtn = new Button("X");
             deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-            deleteBtn.setOnAction(e -> {
-                // Correctly remove the budget from the account's list
+            deleteBtn.setOnAction(e -> {  
                 account.getBudgets().remove(budget);
-                // Refresh the entire page to update all totals
                 onNavigate.accept("budget");
             });
 
@@ -198,8 +184,7 @@ public class BudgetDashboardView {
         categoryLabel.setTextFill(Color.WHITE);
         ComboBox<Category> categoryBox = new ComboBox<>();
         categoryBox.getItems().setAll(Category.values());
-        
-        // --- NEW Date Fields ---
+  
         Label startLabel = new Label("Start Date:");
         startLabel.setTextFill(Color.WHITE);
         DatePicker startDatePicker = new DatePicker(LocalDate.now().withDayOfMonth(1));
@@ -214,7 +199,6 @@ public class BudgetDashboardView {
         grid.add(amountField, 1, 1);
         grid.add(categoryLabel, 0, 2);
         grid.add(categoryBox, 1, 2);
-        //New fields
         grid.add(startLabel, 0, 3);    
         grid.add(startDatePicker, 1, 3); 
         grid.add(endLabel, 0, 4);      
@@ -233,7 +217,6 @@ public class BudgetDashboardView {
                 Budget newBudget = new Budget(name, limit, category, startDate, endDate);
                 account.addBudget(newBudget);
                 onRefresh.run();
-                // Clear fields
                 nameField.clear();
                 amountField.clear();
                 categoryBox.setValue(null);

@@ -77,7 +77,7 @@ public class ReportsDashboardView {
         return controls;
     }
 
-    // This reusable method builds the Income vs. Expense chart for any given period
+    // builds the Income vs. Expense chart for any given period
     private static Node buildIncomeExpenseChartForPeriod(Account account, LocalDate startDate, LocalDate endDate) {
         VBox container = new VBox(10);
         container.setAlignment(Pos.CENTER);

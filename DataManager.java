@@ -21,14 +21,6 @@ public class DataManager {
 
     // Saves ALL transactions currently in the account to a file
     private static void saveTransactions(List<Transaction> transactions) {
-		/*Put into try catch block. Also, use for loops with list of transactions
-		FileWriter fw = new FileWriter(tFile, true);
-		PrintWriter pw = new PrintWriter(fw);
-		for (int i = 0; i < t.size(); i++)
-		{
-			pw.println(t.get(i));
-		}
-		pw.close();*/
         try (PrintWriter pw = new PrintWriter(new FileWriter(TRANSACTIONS_FILE))) {
             for (Transaction t : transactions) {
                 
@@ -45,8 +37,7 @@ public class DataManager {
         }
     }
 	
-    //Saves budget data
-	//Same way with saves all Transactions
+    //Saves budget rule
 	private static void saveBudgets(List<Budget> budgets) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(BUDGETS_FILE))) {
             for (Budget b : budgets) {
@@ -78,7 +69,7 @@ public class DataManager {
 	// Main method to load all data into the application
     public static void loadAllData(Account account, List<RecurringTransaction> recurrRules) {
         loadTransactions(account);
-        loadBudgets(account); // Now loads budgets into the account
+        loadBudgets(account); // loads budgets into the account
         loadRecurringRules(recurrRules);
     }
 
@@ -86,12 +77,6 @@ public class DataManager {
     public static void loadTransactions(Account account) {
         File f = new File(TRANSACTIONS_FILE);
         if (!f.exists()) return;
-        
-		/* Combine 3 lines. Also, put codes into try/catch block
-		BufferedReader reader = new BufferedReader(new FileReader(f));
-		String l = reader.readLine();
-		while (l !=	null)
-		*/
 		try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
             String line;
             while ((line = reader.readLine()) != null) {

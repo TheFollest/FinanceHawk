@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class main2test extends Application {
+public class Main extends Application {
 
     private Account account = new Account();
     private Stage primaryStage;
@@ -60,18 +60,16 @@ public class main2test extends Application {
 	
 	@Override
     public void stop() {
-        // 4. Save all recurring rules when the application closes
-        
-        DataManager.saveAllData(account, recurrRule);
-        
+        //Save all recurring rules when the application closes      
+        DataManager.saveAllData(account, recurrRule);     
     }
 
     private void seedData() {
         account.addBudget(new Budget("June Grocery Budget", 300.0, Category.GROCERIES, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
         account.addBudget(new Budget("July Grocery Budget", 350.0, Category.GROCERIES, LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 31)));
         account.addBudget(new Budget("June Fun Budget", 150.0, Category.ENTERTAINMENT, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
-
-        account.addTransaction(new Transaction(Category.FREELANCE, 1500.00, LocalDate.of(2025, 6, 1), true, ""));
+        account.addTransaction(new Transaction(Category.GROCERIES, 120.00, LocalDate.of(2025, 6, 10), false, ""));
+        account.addTransaction(new Transaction(Category.FREELANCE, 1500.00, LocalDate.of(2025, 6, 20), true, ""));
         account.addTransaction(new Transaction(Category.OTHER, 100.00, LocalDate.of(2025, 6, 10), false, "Birthday gift for Alex"));
 		recurrRule.add(new RecurringTransaction("Monthly Salary", Category.SALARY, 3000.00, LocalDate.of(2025, 6, 25), RecurringTransaction.Frequency.MONTHLY, -1, true));
 		recurrRule.add(new RecurringTransaction("Netflix", Category.SUBSCRIPTION, 15.99, LocalDate.of(2025, 6, 15), RecurringTransaction.Frequency.MONTHLY, -1, false));

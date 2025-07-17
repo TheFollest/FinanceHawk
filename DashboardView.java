@@ -119,21 +119,6 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     PieChart chart = new PieChart();
     chart.setTitle("Expenses by Category (Click a slice to filter)");
 	
-	/*Put aside as a separate class
-    Map<String, String> categoryColors = new HashMap<>();
-    categoryColors.put("SALARY", "#ffee58");
-    categoryColors.put("FREELANCE", "#c0ca33");
-    categoryColors.put("RENT", "#d32f2f");
-    categoryColors.put("GROCERIES", "#ff704d");
-    categoryColors.put("UTILITIES", "#8e24aa");
-    categoryColors.put("ENTERTAINMENT", "#ffa726");
-    categoryColors.put("DINING", "#5c6bc0");
-    categoryColors.put("SUBSCRIPTION", "#26c6da");
-    categoryColors.put("TRANSPORT", "#7cb342");
-    categoryColors.put("MEDICAL", "#66bb6a");
-    categoryColors.put("OTHER", "#42a5f5");
-	*/
-
     for (Category cat : Category.values()) {
         double amount = account.FilterCategory(cat, false);
         if (amount > 0) {
@@ -147,26 +132,15 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     chart.applyCss();
     chart.layout();
 
-    for (PieChart.Data data : chart.getData()) {
-        //String color = categoryColors.getOrDefault(data.getName().toUpperCase(), "#bdbdbd");
+    for (PieChart.Data data : chart.getData()) {   
 		String color = getCategoryColor(data.getName()); 
         data.getNode().setStyle("-fx-pie-color: " + color + ";");
-		
-        // Updated Jul 16: Click listener to show filtered transactions
+
         data.getNode().setOnMouseClicked(event -> {
             showFilteredTransactions(account, data.getName());
         });
     }
 	
-	/*
-    Platform.runLater(() -> {
-        chart.lookupAll(".chart-pie-label").forEach(node -> {
-            if (node instanceof Labeled labeled) {
-                labeled.setTextFill(Color.WHITE);
-            }
-        });
-    });
-	*/
 	
 	Platform.runLater(() -> {
         // Find the title label by its style class and set its color
@@ -180,30 +154,6 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
             node.setStyle("-fx-fill: white;"); // Force to set color to white
         });
     });
-	
-
-
-    /* Put aside as a separate class
-	HBox legend = new HBox(15);
-    legend.setPadding(new Insets(10));
-    legend.setAlignment(Pos.CENTER);
-    legend.setStyle("-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 10;");
-
-    for (PieChart.Data data : chart.getData()) {
-        Label label = new Label(data.getName());
-        label.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        Region colorBox = new Region();
-        colorBox.setPrefSize(10, 10);
-
-        String nodeStyle = data.getNode().getStyle();
-        String fillColor = nodeStyle.substring(nodeStyle.indexOf("#")).replace(";", "");
-        colorBox.setStyle("-fx-background-color: " + fillColor + ";");
-
-        HBox entry = new HBox(5, colorBox, label);
-        entry.setAlignment(Pos.CENTER);
-        legend.getChildren().add(entry);
-    }
-	*/
 	
 	// Build the custom legend
     HBox legend = buildChartLegend(chart);
@@ -254,11 +204,11 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         container.setPadding(new Insets(10));
         container.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
 		
-		// --- Date Calculation for the Last 30 Days ---
-		LocalDate endDate = LocalDate.now(); // The end date is today
-		LocalDate startDate = endDate.minusDays(30); // The start date is 30 days ago
+		//Date Calculation for the Last 30 Days
+		LocalDate endDate = LocalDate.now(); 
+		LocalDate startDate = endDate.minusDays(30); 
         
-		// --- Get Data for Last Month ---
+		// Get Data for the Last 30 Days
 		double income = account.getTotalIncome(startDate, endDate);
 		double expense = account.getTotalExpenses(startDate, endDate);
 		double max = Math.max(income, expense);
@@ -312,95 +262,74 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
     alert.showAndWait();
 	}
 
-// Change method signature to match:
-private static VBox buildBudgetBars(Account account) {
-    VBox box = new VBox(10);
-    box.setPadding(new Insets(10));
-    box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
-    box.setPrefWidth(750); // Or your desired width
-    box.setPrefHeight(250); // Match recurring
+	// Change method signature to match:
+	private static VBox buildBudgetBars(Account account) {
+		VBox box = new VBox(10);
+		box.setPadding(new Insets(10));
+		box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
+		box.setPrefWidth(750); // Or your desired width
+		box.setPrefHeight(250); // Match recurring
 
-    VBox content = new VBox(5);
-    content.setAlignment(Pos.CENTER_LEFT);
-
-		/*
-        Field field = Account.class.getDeclaredField("budgets");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        List<Budget> budgets = (List<Budget>) field.get(account);
-		*/
-	List<Budget> budgets = account.getBudgets();
-    for (Budget budget : budgets) {
-        double spent = budget.getTotalSpent();
-
-        /*Field limitField = Budget.class.getDeclaredField("limit");
-        limitField.setAccessible(true);
-		*/
-        double limit = budget.getLimit();
-
-        double percent;
-		if (limit > 0)
-			percent = Math.min(spent / limit, 1.0);
-        else
-			percent = 0;
-		ProgressBar bar = new ProgressBar(percent);
-        bar.setPrefWidth(750);
-
-        Label label = new Label(budget.toString());
-        label.setTextFill(Color.WHITE);
-        label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
-
-        VBox entry = new VBox(label, bar);
-        entry.setPadding(new Insets(5));
-        content.getChildren().add(entry);
-    }
+		VBox content = new VBox(5);
+		content.setAlignment(Pos.CENTER_LEFT);
+	
+		List<Budget> budgets = account.getBudgets();
+		for (Budget budget : budgets) {
+			double spent = budget.getTotalSpent();
+			double limit = budget.getLimit();
+			double percent;
+			if (limit > 0)
+				percent = Math.min(spent / limit, 1.0);
+			else
+				percent = 0;
+			ProgressBar bar = new ProgressBar(percent);
+			bar.setPrefWidth(750);
+			Label label = new Label(budget.toString());
+			label.setTextFill(Color.WHITE);
+			label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
+			VBox entry = new VBox(label, bar);
+			entry.setPadding(new Insets(5));
+			content.getChildren().add(entry);
+		}
     
 
-    ScrollPane scrollPane = new ScrollPane(content);
-    scrollPane.setPrefHeight(220);  // height within wrapper
-    scrollPane.setFitToWidth(true);
-    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-
-    box.getChildren().add(scrollPane);
-    return box;
-}
+		ScrollPane scrollPane = new ScrollPane(content);
+		scrollPane.setPrefHeight(220);  // height within wrapper
+		scrollPane.setFitToWidth(true);
+		scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+		box.getChildren().add(scrollPane);
+		return box;
+	}
 
 
     private static VBox buildRecentTransactions(Account account) {
-    VBox recentBox = new VBox(10);
-    recentBox.setAlignment(Pos.TOP_LEFT);
-    recentBox.setPrefWidth(700);
-    recentBox.setPadding(new Insets(10));
-    recentBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
-    Label header = new Label("Recent Transactions");
-    header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
-    header.setTextFill(Color.WHITE);
-
-    VBox items = new VBox(5);
-
-    
-        /*Field field = Account.class.getDeclaredField("transactions");
-        field.setAccessible(true);
-        @SuppressWarnings("unchecked")
-		List<Transaction> transactions = (List<Transaction>) field.get(account);
-		*/
-	List<Transaction> transactions = account.getTransactions();
-    int count = 0;
-    for (int i = transactions.size() - 1; i >= 0 && count < 10; i--, count++) {
-        Transaction t = transactions.get(i);
-        Label l = new Label(t.toString());
-        l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
-        l.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
-         items.getChildren().add(l);
-    }
-
-    ScrollPane scrollPane = new ScrollPane(items);
-    scrollPane.setPrefHeight(120);
-    scrollPane.setFitToWidth(true);
-    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-
-    recentBox.getChildren().addAll(header, scrollPane);
-    return recentBox;
+	    VBox recentBox = new VBox(10);
+	    recentBox.setAlignment(Pos.TOP_LEFT);
+	    recentBox.setPrefWidth(700);
+	    recentBox.setPadding(new Insets(10));
+	    recentBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
+	    Label header = new Label("Recent Transactions");
+	    header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+	    header.setTextFill(Color.WHITE);
+	
+	    VBox items = new VBox(5);
+		List<Transaction> transactions = account.getTransactions();
+	    int count = 0;
+	    for (int i = transactions.size() - 1; i >= 0 && count < 10; i--, count++) {
+	        Transaction t = transactions.get(i);
+	        Label l = new Label(t.toString());
+	        l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
+	        l.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
+	         items.getChildren().add(l);
+	    }
+	
+	    ScrollPane scrollPane = new ScrollPane(items);
+	    scrollPane.setPrefHeight(120);
+	    scrollPane.setFitToWidth(true);
+	    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+	
+	    recentBox.getChildren().addAll(header, scrollPane);
+	    return recentBox;
 }
 
     private static VBox buildAlerts(Account account) {
@@ -444,40 +373,38 @@ private static VBox buildBudgetBars(Account account) {
 
         return alerts;
     }
-private static VBox buildRecurringSummary(List<RecurringTransaction> recurringList) {
-    VBox box = new VBox(10);
-    box.setPadding(new Insets(10));
-    box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
-    box.setPrefWidth(750);
-
-    Label title = new Label("Recurring Transactions");
-    title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
-    title.setTextFill(Color.WHITE);
-
-    VBox content = new VBox(5);
-    if (recurringList.isEmpty()) {
-        Label none = new Label("No recurring rules.");
-        none.setTextFill(Color.LIGHTGRAY);
-        content.getChildren().add(none);
-    } else {
-        for (RecurringTransaction rt : recurringList) {
-            Label item = new Label(rt.getDescription() + ": $" + String.format("%.2f", rt.getAmount()));
-            item.setTextFill(Color.WHITE);
-            item.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
-            content.getChildren().add(item);
-        }
-    }
-
-    ScrollPane scrollPane = new ScrollPane(content);
-    scrollPane.setPrefHeight(220); // Matches the budget bar height
-    scrollPane.setFitToWidth(true);
-    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
-
-    box.getChildren().addAll(title, scrollPane);
-    return box;
-}
-
-
-
+    
+	private static VBox buildRecurringSummary(List<RecurringTransaction> recurringList) {
+	    VBox box = new VBox(10);
+	    box.setPadding(new Insets(10));
+	    box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
+	    box.setPrefWidth(750);
+	
+	    Label title = new Label("Recurring Transactions");
+	    title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+	    title.setTextFill(Color.WHITE);
+	
+	    VBox content = new VBox(5);
+	    if (recurringList.isEmpty()) {
+	        Label none = new Label("No recurring rules.");
+	        none.setTextFill(Color.LIGHTGRAY);
+	        content.getChildren().add(none);
+	    } else {
+	        for (RecurringTransaction rt : recurringList) {
+	            Label item = new Label(rt.getDescription() + ": $" + String.format("%.2f", rt.getAmount()));
+	            item.setTextFill(Color.WHITE);
+	            item.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 16));
+	            content.getChildren().add(item);
+	        }
+	    }
+	
+	    ScrollPane scrollPane = new ScrollPane(content);
+	    scrollPane.setPrefHeight(220); // Matches the budget bar height
+	    scrollPane.setFitToWidth(true);
+	    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+	
+	    box.getChildren().addAll(title, scrollPane);
+	    return box;
+	}
 
 }

@@ -21,11 +21,9 @@ public class Account {
 		List<String> notifications = new ArrayList<>(); 
         for (Budget budget : this.budgets) {
         	// Check status BEFORE adding the transaction
-
-        	
-            double spentBefore = budget.getTotalSpent(); // Check amount before
+            double spentBefore = budget.getTotalSpent(); // Check amount before adding to budget
 			budget.addTransaction(t); 
-			double spentAfter = budget.getTotalSpent(); // Check amount after
+			double spentAfter = budget.getTotalSpent(); // Check amount after adding to budget
             
             // Check status AFTER adding the transaction
             if (spentAfter > spentBefore) {
@@ -73,7 +71,7 @@ public class Account {
         return total;
     }
     
-    // NEW: Get total income for a specific period
+    // Get total income for a specific period
     public double getTotalIncome(LocalDate startDate, LocalDate endDate) {
         return transactions.stream()
                 .filter(t -> t.isIncome() && !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
@@ -81,7 +79,7 @@ public class Account {
                 .sum();
     }
 
-    // NEW: Get total expenses for a specific period
+    //Get total expenses for a specific period
     public double getTotalExpenses(LocalDate startDate, LocalDate endDate) {
         return transactions.stream()
                 .filter(t -> !t.isIncome() && !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
@@ -89,10 +87,6 @@ public class Account {
                 .sum();
     }
 	
-    //For testing
-    //public void clearTransactions() {
-    //    transactions.clear();
-    //}
     
     public void deleteTransaction(Transaction t) {
         // Remove from the account's main list

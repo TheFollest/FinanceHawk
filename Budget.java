@@ -25,9 +25,7 @@ public class Budget {
 
     public void addTransaction(Transaction t) {   
     	boolean withinTime = !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate);
-    	//(updated Jul 10)  if (t.getCategory() == category) {
 		if (t.getCategory() == this.category && !t.isIncome() && withinTime) {
-		//=======================
 			transactions.add(t);
         }
     }
@@ -70,11 +68,7 @@ public class Budget {
     
 	@Override
     public String toString() {
-        /*(updated Jul 10)return name + " [" + category + "]: $" + getTotalSpent() + " / $" + limit +
-               (isOverBudget() ? " (Over Budget!)" : "");
-		*/
 		return name + " [" + category + "]: $" + String.format("%.2f", getTotalSpent()) + " / $" + limit +
                (isOverBudget() ? " (Over Budget!)" : (isCloseLimit() ? " (80% of Limit!)" :""));
-		//==================================
     }
 }
