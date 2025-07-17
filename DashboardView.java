@@ -8,7 +8,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
+import java.time.LocalDate;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Consumer;
@@ -82,8 +82,12 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         Button recurringBtn = new Button("Recurring");
         recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
         recurringBtn.setDisable("recurring".equals(currentPage));
+		
+		Button reportsBtn = new Button("Reports");
+		reportsBtn.setOnAction(e -> onNavigate.accept("reports"));
+		reportsBtn.setDisable("reports".equals(currentPage));
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, recurringBtn, searchBtn, reportsBtn);
         return buttons;
     }
 
@@ -249,16 +253,22 @@ public static VBox create(Account account, List<RecurringTransaction> recurringL
         container.setAlignment(Pos.CENTER);
         container.setPadding(new Insets(10));
         container.setStyle("-fx-background-color: rgba(255, 255, 255, 0.08); -fx-background-radius: 10;");
-
-        double income = account.getTotalIncome();
-        double expense = account.getTotalExpenses();
-
-        double max = Math.max(income, expense);
+		
+		// --- Date Calculation for the Last 30 Days ---
+		LocalDate endDate = LocalDate.now(); // The end date is today
+		LocalDate startDate = endDate.minusDays(30); // The start date is 30 days ago
+        
+		// --- Get Data for Last Month ---
+		double income = account.getTotalIncome(startDate, endDate);
+		double expense = account.getTotalExpenses(startDate, endDate);
+		double max = Math.max(income, expense);
         double incomePercent = max == 0 ? 0 : income / max;
         double expensePercent = max == 0 ? 0 : expense / max;
+		//Label title = new Label("Income vs Expense");
+		
 
-        Label title = new Label("Income vs Expense");
-        title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
+        Label title = new Label("Summary for the Last 30 Days");
+		title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
         title.setTextFill(Color.WHITE);
 
         ProgressBar incomeBar = new ProgressBar(incomePercent);
@@ -313,34 +323,38 @@ private static VBox buildBudgetBars(Account account) {
     VBox content = new VBox(5);
     content.setAlignment(Pos.CENTER_LEFT);
 
-    try {
+		/*
         Field field = Account.class.getDeclaredField("budgets");
         field.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<Budget> budgets = (List<Budget>) field.get(account);
+		*/
+	List<Budget> budgets = account.getBudgets();
+    for (Budget budget : budgets) {
+        double spent = budget.getTotalSpent();
 
-        for (Budget budget : budgets) {
-            double spent = budget.getTotalSpent();
+        /*Field limitField = Budget.class.getDeclaredField("limit");
+        limitField.setAccessible(true);
+		*/
+        double limit = budget.getLimit();
 
-            Field limitField = Budget.class.getDeclaredField("limit");
-            limitField.setAccessible(true);
-            double limit = limitField.getDouble(budget);
+        double percent;
+		if (limit > 0)
+			percent = Math.min(spent / limit, 1.0);
+        else
+			percent = 0;
+		ProgressBar bar = new ProgressBar(percent);
+        bar.setPrefWidth(750);
 
-            double percent = Math.min(spent / limit, 1.0);
-            ProgressBar bar = new ProgressBar(percent);
-            bar.setPrefWidth(750);
+        Label label = new Label(budget.toString());
+        label.setTextFill(Color.WHITE);
+        label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 
-            Label label = new Label(budget.getName() + ": $" + String.format("%.2f", spent) + " / $" + limit);
-            label.setTextFill(Color.WHITE);
-            label.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
-
-            VBox entry = new VBox(label, bar);
-            entry.setPadding(new Insets(5));
-            content.getChildren().add(entry);
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
+        VBox entry = new VBox(label, bar);
+        entry.setPadding(new Insets(5));
+        content.getChildren().add(entry);
     }
+    
 
     ScrollPane scrollPane = new ScrollPane(content);
     scrollPane.setPrefHeight(220);  // height within wrapper
@@ -364,22 +378,20 @@ private static VBox buildBudgetBars(Account account) {
 
     VBox items = new VBox(5);
 
-    try {
-        Field field = Account.class.getDeclaredField("transactions");
+    
+        /*Field field = Account.class.getDeclaredField("transactions");
         field.setAccessible(true);
         @SuppressWarnings("unchecked")
-        List<Transaction> transactions = (List<Transaction>) field.get(account);
-
-        int count = 0;
-        for (int i = transactions.size() - 1; i >= 0 && count < 10; i--, count++) {
-            Transaction t = transactions.get(i);
-            Label l = new Label(t.toString());
-            l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
-            l.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
-            items.getChildren().add(l);
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
+		List<Transaction> transactions = (List<Transaction>) field.get(account);
+		*/
+	List<Transaction> transactions = account.getTransactions();
+    int count = 0;
+    for (int i = transactions.size() - 1; i >= 0 && count < 10; i--, count++) {
+        Transaction t = transactions.get(i);
+        Label l = new Label(t.toString());
+        l.setTextFill(t.isIncome() ? Color.LIGHTGREEN : Color.SALMON);
+        l.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
+         items.getChildren().add(l);
     }
 
     ScrollPane scrollPane = new ScrollPane(items);

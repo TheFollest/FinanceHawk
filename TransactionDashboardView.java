@@ -20,6 +20,7 @@ public class TransactionDashboardView {
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
         layout.getChildren().add(buildButtonBar(onNavigate,"transactions"));
+		
 
         Label title = new Label("Transaction Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 28));
@@ -91,9 +92,23 @@ public class TransactionDashboardView {
                 }
 
                 Transaction txn = new Transaction(category, amount, date, isIncome, note);
-                account.addTransaction(txn);
+                List<String> notifications = account.addTransaction(txn);
+				//account.addTransaction(txn);
                 feedback.setTextFill(Color.LIGHTGREEN);
                 feedback.setText("Transaction added!");
+				
+				//Notification
+				if (notifications != null && !notifications.isEmpty()) {
+					for (String message : notifications) {
+						Alert alert = new Alert(Alert.AlertType.WARNING);
+						alert.setTitle("Budget Alert");
+						alert.setHeaderText(null);
+						alert.setContentText(message);
+						alert.showAndWait();
+					}
+				}
+				onNavigate.accept("transactions");
+				
 
                 amountField.clear();
                 noteField.clear();
@@ -141,7 +156,7 @@ public class TransactionDashboardView {
                 Button deleteBtn = new Button("X");
                 deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                 deleteBtn.setOnAction(e -> {
-                    txns.remove(txn);
+                    account.deleteTransaction(txn);
                     onNavigate.accept("transactions"); // refresh
                 });
 
@@ -189,8 +204,12 @@ public class TransactionDashboardView {
         Button recurringBtn = new Button("Recurring");
         recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
         recurringBtn.setDisable("recurring".equals(currentPage));
+		
+		Button reportsBtn = new Button("Reports");
+		reportsBtn.setOnAction(e -> onNavigate.accept("reports"));
+		reportsBtn.setDisable("reports".equals(currentPage));
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, recurringBtn, searchBtn, reportsBtn);
         return buttons;
     }
 }

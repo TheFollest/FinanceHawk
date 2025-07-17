@@ -74,6 +74,7 @@ public class DataManager {
         }
     }
 	
+	
 	// Main method to load all data into the application
     public static void loadAllData(Account account, List<RecurringTransaction> recurrRules) {
         loadTransactions(account);
@@ -82,7 +83,7 @@ public class DataManager {
     }
 
     // Loads transactions from the file into the account
-    private static void loadTransactions(Account account) {
+    public static void loadTransactions(Account account) {
         File f = new File(TRANSACTIONS_FILE);
         if (!f.exists()) return;
         
@@ -109,7 +110,7 @@ public class DataManager {
     }
 	
 	// Loads budget data
-    private static void loadBudgets(Account account) {
+    public static void loadBudgets(Account account) {
         File f = new File(BUDGETS_FILE);
         if (!f.exists()) return;
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
@@ -128,7 +129,7 @@ public class DataManager {
     }	
 
     // Loads recurring transaction rules
-    private static void loadRecurringRules(List<RecurringTransaction> rules) {
+    public static void loadRecurringRules(List<RecurringTransaction> rules) {
         File f = new File(RECURRING_RULES_FILE);
         if (!f.exists()) return;
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {

@@ -5,7 +5,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
+import javafx.scene.Node;
 import java.lang.reflect.Field;
 import java.time.LocalDate; // IMPORT ADDED
 import java.util.List;
@@ -23,33 +23,37 @@ import java.util.function.Consumer;
 
 public class BudgetDashboardView {
 
-    public static VBox create(Account account, Consumer<String> onNavigate, Runnable onBack) {
+    public static VBox create(Account account, Consumer<String> onNavigate) {
         VBox layout = new VBox(20);
         layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);");
 
-        layout.getChildren().add(buildButtonBar(onNavigate, "budget"));
+        //layout.getChildren().add(buildButtonBar(onNavigate, "budget"));
 
         Label title = new Label("Budget Dashboard");
         title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 30));
         title.setTextFill(Color.WHITE);
 
-        Label totalLabel = new Label("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
-        totalLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
-        totalLabel.setTextFill(Color.LIGHTGREEN);
-
-        VBox budgetBoxContainer = new VBox();
-        refreshBudgetBars(account, budgetBoxContainer, totalLabel);
-        ScrollPane scrollPane = new ScrollPane(budgetBoxContainer);
-        scrollPane.setPrefHeight(300);  // ⬅️ Adjust height as needed
+        //Label totalLabel = new Label("Total Budget: $" + String.format("%.2f", getTotalBudget(account)));
+        //totalLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 20));
+        //totalLabel.setTextFill(Color.LIGHTGREEN);	
+        //VBox budgetBoxContainer = new VBox();
+		//refreshBudgetBars(account, budgetBoxContainer, totalLabel);
+		
+        VBox budgetListContainer = buildBudgetList(account, onNavigate);
+        ScrollPane scrollPane = new ScrollPane(budgetListContainer);
+        scrollPane.setPrefHeight(300);  
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
-        VBox inputForm = buildInputForm(account, () -> refreshBudgetBars(account, budgetBoxContainer, totalLabel));
+        //VBox inputForm = buildInputForm(account, () -> refreshBudgetBars(account, budgetBoxContainer, totalLabel));
+        //layout.getChildren().addAll(title, totalLabel, scrollPane, inputForm);
+         VBox inputForm = buildInputForm(account, () -> onNavigate.accept("budget"));
 
-        layout.getChildren().addAll(title, totalLabel, scrollPane, inputForm);
-        return layout;
+        layout.getChildren().addAll(
+            buildButtonBar(onNavigate, "budget"), title, scrollPane,inputForm);
+		return layout;
     }
 
     private static HBox buildButtonBar(Consumer<String> onNavigate, String currentPage) {
@@ -76,9 +80,21 @@ public class BudgetDashboardView {
         Button recurringBtn = new Button("Recurring");
         recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
         recurringBtn.setDisable("recurring".equals(currentPage));
+	    Button reportsBtn = new Button("Reports");
+		reportsBtn.setOnAction(e -> onNavigate.accept("reports"));
+		reportsBtn.setDisable("reports".equals(currentPage));		
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
-        return buttons;
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, recurringBtn, searchBtn, reportsBtn);
+        for (Node node : buttons.getChildren()) {
+            if (node instanceof Button) {
+                Button btn = (Button) node;
+                if (btn.getText().equalsIgnoreCase(currentPage)) {
+                    btn.setDisable(true);
+                    break;
+                }
+            }
+        }
+		return buttons;
     }
 
 
@@ -122,6 +138,42 @@ public class BudgetDashboardView {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+// This method now builds the list of budget bars
+    private static VBox buildBudgetList(Account account, Consumer<String> onNavigate) {
+        VBox container = new VBox(10);
+        
+        // Use the safe getter method instead of reflection
+        List<Budget> budgets = account.getBudgets();
+
+        for (Budget budget : budgets) {
+            double spent = budget.getTotalSpent();
+            double limit = budget.getLimit();
+            double percent = (limit > 0) ? Math.min(spent / limit, 1.0) : 0;
+
+            ProgressBar bar = new ProgressBar(percent);
+            bar.setPrefWidth(400);
+            
+            // Use the budget's own toString for the label
+            Label label = new Label(budget.toString());
+            label.setTextFill(Color.WHITE);
+
+            Button deleteBtn = new Button("X");
+            deleteBtn.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+            deleteBtn.setOnAction(e -> {
+                // Correctly remove the budget from the account's list
+                account.getBudgets().remove(budget);
+                // Refresh the entire page to update all totals
+                onNavigate.accept("budget");
+            });
+
+            HBox row = new HBox(10, label, deleteBtn);
+            row.setAlignment(Pos.CENTER_LEFT);
+
+            VBox entry = new VBox(5, row, bar);
+            container.getChildren().add(entry);
+        }
+        return container;
     }
 
     private static VBox buildInputForm(Account account, Runnable onRefresh) {

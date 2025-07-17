@@ -2,7 +2,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
-
+import javafx.scene.control.Alert;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +24,26 @@ public class main2test extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        //seedData();
+        
 
-        // Load all saved data from the last session
-        DataManager.loadAllData(account, recurrRule);
+        // Load the RULES for budgets and recurring transactions first.
+        DataManager.loadBudgets(account);
+        DataManager.loadRecurringRules(recurrRule);
+		
 		// If no rules were loaded, seed with default data (for first-time run)
         if (recurrRule.isEmpty() && account.getTransactions().isEmpty() && account.getBudgets().isEmpty()) {
-            seedData();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Welcome!");
+            alert.setHeaderText("Welcome to Finance Hawk");
+            alert.setContentText("We've loaded some sample data to help you get started.");
+            alert.showAndWait();
+			seedData();
         }
 		
+		// Load all transactions
+		DataManager.loadTransactions(account);
+		
+		//Sync and generate NEW recurring transactions
 		RecurrSync.syncRecurringTransactions(account, recurrRule);
 
 
@@ -60,8 +71,7 @@ public class main2test extends Application {
         account.addBudget(new Budget("July Grocery Budget", 350.0, Category.GROCERIES, LocalDate.of(2025, 7, 1), LocalDate.of(2025, 7, 31)));
         account.addBudget(new Budget("June Fun Budget", 150.0, Category.ENTERTAINMENT, LocalDate.of(2025, 6, 1), LocalDate.of(2025, 6, 30)));
 
-        account.addTransaction(new Transaction(Category.SALARY, 2500.00, LocalDate.of(2025, 6, 1), true, ""));
-        account.addTransaction(new Transaction(Category.GROCERIES, 230.00, LocalDate.of(2025, 6, 6), false, ""));
+        account.addTransaction(new Transaction(Category.FREELANCE, 1500.00, LocalDate.of(2025, 6, 1), true, ""));
         account.addTransaction(new Transaction(Category.OTHER, 100.00, LocalDate.of(2025, 6, 10), false, "Birthday gift for Alex"));
 		recurrRule.add(new RecurringTransaction("Monthly Salary", Category.SALARY, 3000.00, LocalDate.of(2025, 6, 25), RecurringTransaction.Frequency.MONTHLY, -1, true));
 		recurrRule.add(new RecurringTransaction("Netflix", Category.SUBSCRIPTION, 15.99, LocalDate.of(2025, 6, 15), RecurringTransaction.Frequency.MONTHLY, -1, false));
@@ -74,7 +84,7 @@ public class main2test extends Application {
     }
 
     private void showBudgetDashboard() {
-        VBox root = BudgetDashboardView.create(account, this::navigate, this::showBudgetDashboard);
+        VBox root = BudgetDashboardView.create(account, this::navigate);
         updateScene(root, "Finance Hawk - Budget");
     }
 
@@ -92,6 +102,11 @@ public class main2test extends Application {
         VBox root = RecurrDashboardView.create(account, recurrRule, this::navigate, this::showRecurrDashboardView);
         updateScene(root, "Finance Hawk - Recurring Rules");
     }
+	
+	private void showReportsDashboard() {
+    VBox root = ReportsDashboardView.create(account, this::navigate);
+    updateScene(root, "Finance Hawk - Reports");
+	}
 
     private void updateScene(VBox root, String title) {
         Scene scene = new Scene(root, prevWidth, prevHeight);
@@ -115,6 +130,7 @@ public class main2test extends Application {
             case "transactions" -> showTransactionDashboard();
             case "search" -> showSearchDashboard();
             case "recurring" -> showRecurrDashboardView();
+			case "reports" -> showReportsDashboard();
             default -> showDashboard();
         }
     }

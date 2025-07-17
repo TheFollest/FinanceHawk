@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 public class Account {
     private List<Transaction> transactions;
@@ -15,25 +16,33 @@ public class Account {
         this.budgets.add(budget);
     }
     
-    public void addTransaction(Transaction t) {
-        transactions.add(t);
+    public List<String> addTransaction(Transaction t) {
+        this.transactions.add(t);
+		List<String> notifications = new ArrayList<>(); 
         for (Budget budget : this.budgets) {
         	// Check status BEFORE adding the transaction
-        	boolean wasClose = budget.isCloseLimit();
-        	boolean wasOver = budget.isOverBudget();
+
         	
-            budget.addTransaction(t); 
+            double spentBefore = budget.getTotalSpent(); // Check amount before
+			budget.addTransaction(t); 
+			double spentAfter = budget.getTotalSpent(); // Check amount after
             
             // Check status AFTER adding the transaction
-            boolean isClose = budget.isCloseLimit();
-        	boolean isOver = budget.isOverBudget();
+            if (spentAfter > spentBefore) {
+            boolean wasOver = spentBefore > budget.getLimit();
+            boolean isOver = spentAfter > budget.getLimit();
+
+            boolean wasClose = spentBefore >= (budget.getLimit() * 0.8);
+            boolean isClose = spentAfter >= (budget.getLimit() * 0.8);
         	
         	//Notify
         	if (isOver && !wasOver)
-        		System.out.println("You have exceeded your " + budget.getName());
+        		notifications.add("You have exceeded your " + budget.getName());
         	else if (isClose && !wasClose)
-        		System.out.println("You have reached 80% of your " + budget.getName());    
-        }
+        		notifications.add("You have reached 80% of your " + budget.getName());    
+			}
+		}
+		return notifications;
     }
 
     public List<Transaction> getTransactions() {
@@ -64,7 +73,22 @@ public class Account {
         return total;
     }
     
-    
+    // NEW: Get total income for a specific period
+    public double getTotalIncome(LocalDate startDate, LocalDate endDate) {
+        return transactions.stream()
+                .filter(t -> t.isIncome() && !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+
+    // NEW: Get total expenses for a specific period
+    public double getTotalExpenses(LocalDate startDate, LocalDate endDate) {
+        return transactions.stream()
+                .filter(t -> !t.isIncome() && !t.getDate().isBefore(startDate) && !t.getDate().isAfter(endDate))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+	
     //For testing
     //public void clearTransactions() {
     //    transactions.clear();

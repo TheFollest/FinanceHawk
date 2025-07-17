@@ -50,8 +50,12 @@ public class SearchDashboardView {
         Button recurringBtn = new Button("Recurring");
         recurringBtn.setOnAction(e -> onNavigate.accept("recurring"));
         recurringBtn.setDisable("recurring".equals(currentPage));
+		
+		Button reportsBtn = new Button("Reports");
+		reportsBtn.setOnAction(e -> onNavigate.accept("reports"));
+		reportsBtn.setDisable("reports".equals(currentPage));
 
-        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, searchBtn, recurringBtn);
+        buttons.getChildren().addAll(dashboardBtn, budgetBtn, transactionBtn, recurringBtn, searchBtn, reportsBtn);
         return buttons;
     }
 
