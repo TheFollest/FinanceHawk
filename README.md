@@ -61,9 +61,10 @@ Once you open the app (just double-click the `.exe` file), you’ll see buttons 
 
 ## How to Start
 
-1. Download the project folder.  
-2. Run the `.exe` file inside the folder.  
-3. Start using the app by clicking the buttons on the dashboard.
+1. Navigate to the [releases/latest](https://github.com/octo-org/octo-repo/releases/latest) page and download the zip file.
+2. Extract zip file to a location of your choice.  
+3. Run the `.exe` file inside the folder.  
+4. Start using the app by clicking the buttons on the dashboard.
 
 
 ## Credits
